@@ -65,9 +65,6 @@ public strictfp class RobotPlayer {
                     rc.build(TrapType.EXPLOSIVE, prevLoc);
                 // We can also move our code into different methods or classes to better organize it!
                 updateEnemyRobots(rc);
-
-            } catch (GameActionException e) {
-                e.printStackTrace();
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
