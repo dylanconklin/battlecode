@@ -1,6 +1,6 @@
 # Battlecode 2024 Scaffold
 
-This is the Battlecode 2024 scaffold, containing an `examplefuncsplayer`. Read https://play.battlecode.org/bc24/getting-started!
+This is the Battlecode 2024 scaffold, containing an `Team3`. Read https://play.battlecode.org/bc24/getting-started!
 
 **We are using a rewritten version of the client this year, so please let teh devs know 
 if you encounter any issues or have any feedback!**
@@ -30,8 +30,8 @@ if you encounter any issues or have any feedback!**
 
 ### How to get started
 
-You are free to directly edit `examplefuncsplayer`.
-However, we recommend you make a new bot by copying `examplefuncsplayer` to a new package under the `src` folder.
+You are free to directly edit `Team3`.
+However, we recommend you make a new bot by copying `Team3` to a new package under the `src` folder.
 
 ### Useful Commands
 

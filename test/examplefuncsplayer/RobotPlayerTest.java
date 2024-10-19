@@ -1,4 +1,4 @@
-package examplefuncsplayer;
+package Team3;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
