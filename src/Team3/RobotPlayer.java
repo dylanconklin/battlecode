@@ -36,9 +36,17 @@ public strictfp class RobotPlayer {
     public static void run(RobotController rc) {
         while (true) {
             turnCount++;
+            Duck duck;
 
             try {
                 spawn(rc);
+
+                if (rng.nextBoolean()) {
+                    duck = new AttackerDuck(rc);
+                } else {
+                    duck = new HealerDuck(rc);
+                }
+                duck.play();
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
