@@ -15,6 +15,8 @@ public strictfp class RobotPlayer {
     static final Direction[] directions = {Direction.NORTH, Direction.NORTHEAST, Direction.EAST, Direction.SOUTHEAST, Direction.SOUTH, Direction.SOUTHWEST, Direction.WEST, Direction.NORTHWEST,};
     static int turnCount = 0;
 
+    // Make sure you spawn your robot in before you attempt to take any actions!
+    // Robots not spawned in do not have vision of any tiles and cannot perform any actions.
     public static void spawn(RobotController rc) throws GameActionException {
         while (!rc.isSpawned()) {
             MapLocation[] spawnLocs = rc.getAllySpawnLocations();
@@ -25,7 +27,7 @@ public strictfp class RobotPlayer {
     }
 
     /**
-     * run() is the method that is called when a robot is instantiated in the Battlecode world.
+     * run() is the method that is called when a robot is instantiated in the Battle code world.
      * It is like the main function for your robot. If this method returns, the robot dies!
      *
      * @param rc The RobotController object. You use it to perform actions from this robot, and to get
@@ -37,8 +39,6 @@ public strictfp class RobotPlayer {
             turnCount++;
 
             try {
-                // Make sure you spawn your robot in before you attempt to take any actions!
-                // Robots not spawned in do not have vision of any tiles and cannot perform any actions.
                 spawn(rc);
                 if (rc.canPickupFlag(rc.getLocation())) {
                     rc.pickupFlag(rc.getLocation());
