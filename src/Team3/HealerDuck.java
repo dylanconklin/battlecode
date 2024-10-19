@@ -7,4 +7,11 @@ public class HealerDuck extends Duck {
         super(rc);
         skill = SkillType.HEAL;
     }
+
+    @Override public void play() throws GameActionException {
+        super.play();
+    }
+
+    public void heal() {}
+    public void move() {}
 }
