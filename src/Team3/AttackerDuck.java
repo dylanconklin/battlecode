@@ -27,7 +27,7 @@ public class AttackerDuck extends Duck {
         }
     }
 
-    public void moveToward(MapLocation location) throws GameActionException {
+    @Override public void moveToward(MapLocation location) throws GameActionException {
         Direction direction = rc.getLocation().directionTo(location);
         if (rc.canMove(direction)) {
             rc.move(direction);
@@ -35,6 +35,7 @@ public class AttackerDuck extends Duck {
             for (Direction otherDirection : Direction.allDirections()) {
                 if (rc.canMove(otherDirection)) {
                     rc.move(otherDirection);
+                    break;
                 }
             }
         }
