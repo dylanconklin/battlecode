@@ -12,6 +12,6 @@ public class HealerDuck extends Duck {
         super.play();
     }
 
-    public void heal() {}
-    public void move() {}
+    public void heal() throws GameActionException {}
+    public void move() throws GameActionException {}
 }
