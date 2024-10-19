@@ -40,6 +40,4 @@ public class AttackerDuck extends Duck {
             }
         }
     }
-    public void moveAwayFrom(MapLocation location) throws GameActionException {
-    }
 }

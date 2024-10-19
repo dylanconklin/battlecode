@@ -34,6 +34,13 @@ public class Duck {
         updateEnemyRobots(rc);
     }
 
+    public void moveAwayFrom(MapLocation location) throws GameActionException {
+        Direction direction = rc.getLocation().directionTo(location).opposite();
+        if (rc.canMove(direction)) {
+            rc.move(direction);
+        }
+    }
+
     public void moveToward(MapLocation location) throws GameActionException {
         Direction direction = rc.getLocation().directionTo(location);
         if (rc.canMove(direction)) {
