@@ -16,11 +16,12 @@ public class AttackerDuck extends Duck {
     public void attack() {}
     public void move() throws GameActionException {
         MapLocation[] locations = rc.getAllySpawnLocations();
-        if (rc.hasFlag()) {
+        while (rc.hasFlag() && rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
             // move toward ally spawn locations
             // TODO: don't move blindly toward locations[0]
-            moveToward(locations[0]);
-        } else {
+            moveTowardAllySpawnZone();
+        }
+        while (!rc.hasFlag() && rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
             // move toward adversary spawn locations
             // TODO: don't move blindly away from locations[0]
             moveAwayFrom(locations[0]);
