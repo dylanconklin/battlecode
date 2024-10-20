@@ -12,7 +12,16 @@ public class AttackerDuck extends Duck {
         super.play();
     }
 
-    public void attack() {}
+    public void attack() throws GameActionException {
+        RobotInfo[] robotInfos = rc.senseNearbyRobots();
+        Team rcTeam = rc.getTeam();
+        for (RobotInfo robot : robotInfos) {
+            if (robot.team != rcTeam && rc.canAttack(robot.location)) {
+                rc.attack(robot.location);
+            }
+        }
+    }
+
     public void move() throws GameActionException {
         MapLocation[] locations = rc.getAllySpawnLocations();
         while (rc.getRoundNum() >= GameConstants.SETUP_ROUNDS && ( rc.hasFlag() || rc.getHealAmount() <= 300 )) {
