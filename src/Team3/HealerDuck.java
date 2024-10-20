@@ -13,7 +13,10 @@ public class HealerDuck extends Duck {
         super.play();
     }
 
-    public void heal() throws GameActionException {
+    // this method will return true / false based on the fact if it is healing or not. this return can be utilized
+    // to take a move action upon not healing.
+
+    private boolean heal() throws GameActionException {
         // heal () should be called from move method.
         //sensing all the robots near in its vision to heal. it will heal only the ally robots.
         RobotInfo[] nearbyAllies = rc.senseNearbyRobots(-1,rc.getTeam());
@@ -25,10 +28,11 @@ public class HealerDuck extends Duck {
                     rc.heal(ally.location);
                     // add experience while healing.
                     rc.getExperience(SkillType.HEAL);
-                    return;  // Heal only one ally per turn
+                    return true;  // Heal only one ally per turn
                 }
             }
         }
+        return false;
     }
     public void move() throws GameActionException {
         MapLocation[] locations = rc.getAllySpawnLocations();
