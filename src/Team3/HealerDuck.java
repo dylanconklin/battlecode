@@ -53,7 +53,6 @@ public class HealerDuck extends Duck {
         Direction dir = rc.getLocation().directionTo(firstLoc);
         if (rc.canMove(dir)) rc.move(dir);
     }
-    public void heal() throws GameActionException {}
     public void move() throws GameActionException {
         MapLocation[] locations = rc.getAllySpawnLocations();
         if (rc.hasFlag()) {
