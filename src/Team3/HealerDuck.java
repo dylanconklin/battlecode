@@ -18,13 +18,6 @@ public class HealerDuck extends Duck {
         }
     }
 
-    private void moveTowardEnemySpawnZone() throws GameActionException {
-        MapLocation[] spawnLocs = rc.getAllySpawnLocations();
-        MapLocation firstLoc = spawnLocs[0];
-        Direction dir = rc.getLocation().directionTo(firstLoc).opposite();
-        if (rc.canMove(dir)) rc.move(dir);
-    }
-
     // this method will return true / false based on the fact if it is healing or not. this return can be utilized
     // to take a move action upon not healing.
 
