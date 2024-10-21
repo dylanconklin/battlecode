@@ -65,7 +65,7 @@ public class HealerDuck extends Duck {
     private static void moveTowardEnemySpawnZone(RobotController rc) throws GameActionException {
         MapLocation[] spawnLocs = rc.getAllySpawnLocations();
         MapLocation firstLoc = spawnLocs[0];
-        Direction dir = rc.getLocation().directionTo(firstLoc);
+        Direction dir = rc.getLocation().directionTo(firstLoc).opposite();
         if (rc.canMove(dir)) rc.move(dir);
     }
      public void moveToward(RobotController rc,MapLocation location) throws GameActionException {
