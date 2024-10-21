@@ -54,19 +54,20 @@ public class HealerDuck extends Duck {
 
     private boolean heal() throws GameActionException {
         // heal () should be called from move method.
-        //sensing all the robots near in its vision to heal. it will heal only the ally robots.
+        // sensing all the robots near in its vision to heal. it will heal only the ally robots.
         RobotInfo[] nearbyAllies = rc.senseNearbyRobots(-1, rc.getTeam());
+        boolean didHeal = false;
         for (RobotInfo ally : nearbyAllies) {
             // need to find the constants and replace 100 with that HP constants (better not to use hardcode value)
             if (ally.getHealth() <= 300) {
                 // Heal the ally if it's within healing range
                 if (rc.canHeal(ally.location)) {
                     rc.heal(ally.location);
-                    return true;  // Heal only one ally per turn
+                    didHeal = true;  // Heal only one ally per turn
                 }
             }
         }
-        return false;
+        return didHeal;
     }
 
     public void move() throws GameActionException {
