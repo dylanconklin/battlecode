@@ -3,8 +3,6 @@ package Team3;
 import battlecode.common.*;
 
 public class HealerDuck extends Duck {
-    static Direction direction;
-
     public HealerDuck(RobotController rc) throws GameActionException {
         super(rc);
         skill = SkillType.HEAL;
@@ -66,24 +64,9 @@ public class HealerDuck extends Duck {
     }
 
     public void move() throws GameActionException {
-        MapLocation[] locations = rc.getAllySpawnLocations();
+        lookForFlag(); // Look For Flag
         if (rc.hasFlag()) {
             moveTowardAllySpawnZone();
-        } else {
-            // move toward adversary spawn locations
-            // TODO: don't move blindly away from locations[0]
-            lookForFlag(); // Look For Flag
-        }
-    }
-
-    public void moveToward(MapLocation location) throws GameActionException {
-        direction = rc.getLocation().directionTo(location);
-        if (rc.hasFlag()) {
-            moveTowardAllySpawnZone();
-        } else if (rc.canMove(direction)) {
-            rc.move(direction);
-        } else if (rc.canFill(rc.getLocation().add(direction))) {
-            rc.fill(rc.getLocation().add(direction));
         } else {
             for (Direction otherDirection : Direction.allDirections()) {
                 if (rc.canMove(otherDirection)) {
