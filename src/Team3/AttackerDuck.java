@@ -1,7 +1,6 @@
 package Team3;
 
 import battlecode.common.*;
-import java.util.*;
 
 public class AttackerDuck extends Duck {
     public AttackerDuck(RobotController rc) {
@@ -13,16 +12,26 @@ public class AttackerDuck extends Duck {
         super.play();
     }
 
-    public void attack() {}
+    public void attack() throws GameActionException {
+        RobotInfo[] robotInfos = rc.senseNearbyRobots();
+        Team rcTeam = rc.getTeam();
+        for (RobotInfo robot : robotInfos) {
+            if (robot.team != rcTeam && rc.canAttack(robot.location)) {
+                rc.attack(robot.location);
+            }
+        }
+    }
+
     public void move() throws GameActionException {
-        MapLocation[] locations = rc.getAllySpawnLocations();
-        if (rc.hasFlag()) {
+        while (rc.getRoundNum() >= GameConstants.SETUP_ROUNDS && ( rc.hasFlag() || rc.getHealAmount() <= 300 )) {
             // move toward ally spawn locations
             // TODO: don't move blindly toward locations[0]
-            moveToward(locations[0]);
-        } else {
+            moveToward(allySpawnZoneDirection());
+        }
+        if (!rc.hasFlag() && rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
             // move toward adversary spawn locations
             // TODO: don't move blindly away from locations[0]
+            MapLocation[] locations = rc.getAllySpawnLocations();
             moveAwayFrom(locations[0]);
         }
     }

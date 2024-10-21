@@ -13,9 +13,8 @@ public class Duck {
     public void play() throws GameActionException {
         pickupFlag();
 
-        // If we are holding an enemy flag, singularly focus on moving towards an ally spawn zone to capture it! We use the check roundNum >= SETUP_ROUNDS to make sure setup phase has ended.
         while (rc.hasFlag() && rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
-            moveTowardAllySpawnZone(rc);
+            moveToward(allySpawnZoneDirection());
         }
         // Move and attack randomly if no objective.
         Direction dir = RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
@@ -36,23 +35,29 @@ public class Duck {
 
     public void moveAwayFrom(MapLocation location) throws GameActionException {
         Direction direction = rc.getLocation().directionTo(location).opposite();
-        if (rc.canMove(direction)) {
-            rc.move(direction);
-        }
+        moveToward(direction);
     }
 
     public void moveToward(MapLocation location) throws GameActionException {
         Direction direction = rc.getLocation().directionTo(location);
+        moveToward(direction);
+    }
+
+    public void moveToward(Direction direction) throws GameActionException {
+        if (rc.canFill(rc.getLocation().add(direction))) {
+            rc.fill(rc.getLocation().add(direction));
+        }
         if (rc.canMove(direction)) {
             rc.move(direction);
         }
     }
 
-    private static void moveTowardAllySpawnZone(RobotController rc) throws GameActionException {
-        MapLocation[] spawnLocs = rc.getAllySpawnLocations();
-        MapLocation firstLoc = spawnLocs[0];
-        Direction dir = rc.getLocation().directionTo(firstLoc);
-        if (rc.canMove(dir)) rc.move(dir);
+    public Direction allySpawnZoneDirection() {
+        return rc.getLocation().directionTo(rc.getAllySpawnLocations()[0]);
+    }
+
+    public Direction enemySpawnZoneDirection() {
+        return allySpawnZoneDirection().opposite();
     }
 
     public static void updateEnemyRobots(RobotController rc) throws GameActionException {
