@@ -12,7 +12,7 @@ public class HealerDuck extends Duck {
         FlagInfo[] flags = rc.senseNearbyFlags(-1, rc.getTeam());
         for (FlagInfo flag : flags) {
             if (rc.canPickupFlag(flag.getLocation())) {
-                rc.canPickupFlag(flag.getLocation());
+                rc.pickupFlag(flag.getLocation());
                 break;
             }
         }
