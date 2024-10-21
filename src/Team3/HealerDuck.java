@@ -14,8 +14,8 @@ public class HealerDuck extends Duck {
     public void exploreAround() throws GameActionException {
         MapLocation[] closeByCrumbs = rc.senseNearbyCrumbs(-1);
         while (closeByCrumbs.length > 0) {
-            closeByCrumbs = rc.senseNearbyCrumbs(-1);
             moveToward(closeByCrumbs[0]);
+            closeByCrumbs = rc.senseNearbyCrumbs(-1);
         }
     }
 
