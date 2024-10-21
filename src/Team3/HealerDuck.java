@@ -46,16 +46,10 @@ public class HealerDuck extends Duck {
         }
         return false;
     }
-    private static void moveTowardAllySpawnZone(RobotController rc) throws GameActionException {
-        MapLocation[] spawnLocs = rc.getAllySpawnLocations();
-        MapLocation firstLoc = spawnLocs[0];
-        Direction dir = rc.getLocation().directionTo(firstLoc);
-        if (rc.canMove(dir)) rc.move(dir);
-    }
     public void move() throws GameActionException {
         MapLocation[] locations = rc.getAllySpawnLocations();
         if (rc.hasFlag()) {
-            moveTowardAllySpawnZone(rc);
+            moveTowardAllySpawnZone();
         } else {
             // move toward adversary spawn locations
             // TODO: don't move blindly away from locations[0]
@@ -71,7 +65,7 @@ public class HealerDuck extends Duck {
      public void moveToward(RobotController rc,MapLocation location) throws GameActionException {
      direction = rc.getLocation().directionTo(location);
      if(rc.hasFlag()){
-       moveTowardAllySpawnZone(rc);
+       moveTowardAllySpawnZone();
      }
      else if (rc.canMove(direction)) {
        rc.move(direction);
