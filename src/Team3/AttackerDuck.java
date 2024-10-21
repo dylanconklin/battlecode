@@ -8,8 +8,11 @@ public class AttackerDuck extends Duck {
         skill = SkillType.ATTACK;
     }
 
-    @Override public void play() throws GameActionException {
-        super.play();
+    @Override
+    public void play() throws GameActionException {
+        attack();
+        lookForFlag();
+        move();
     }
 
     public void attack() throws GameActionException {
@@ -23,7 +26,7 @@ public class AttackerDuck extends Duck {
     }
 
     public void move() throws GameActionException {
-        while (rc.getRoundNum() >= GameConstants.SETUP_ROUNDS && ( rc.hasFlag() || rc.getHealAmount() <= 300 )) {
+        while (rc.getRoundNum() >= GameConstants.SETUP_ROUNDS && (rc.hasFlag() || rc.getHealAmount() <= 300)) {
             // move toward ally spawn locations
             // TODO: don't move blindly toward locations[0]
             moveToward(allySpawnZoneDirection());
