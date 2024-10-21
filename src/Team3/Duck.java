@@ -54,11 +54,12 @@ public class Duck {
         }
     }
 
-    public void moveTowardAllySpawnZone() throws GameActionException {
-        MapLocation[] spawnLocs = rc.getAllySpawnLocations();
-        MapLocation firstLoc = spawnLocs[0];
-        Direction dir = rc.getLocation().directionTo(firstLoc);
-        if (rc.canMove(dir)) rc.move(dir);
+    public Direction allySpawnZoneDirection() {
+        return rc.getLocation().directionTo(rc.getAllySpawnLocations()[0]);
+    }
+
+    public Direction enemySpawnZoneDirection() {
+        return allySpawnZoneDirection().opposite();
     }
 
     public static void updateEnemyRobots(RobotController rc) throws GameActionException {
