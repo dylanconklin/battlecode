@@ -10,7 +10,7 @@ public class Duck {
         this.rc = rc;
     }
 
-    public static void updateEnemyRobots(RobotController rc) throws GameActionException {
+    public void updateEnemyRobots() throws GameActionException {
         // Sensing methods can be passed in a radius of -1 to automatically
         // use the largest possible value.
         RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
