@@ -92,7 +92,6 @@ public class HealerDuck extends Duck {
         } else if (rc.canFill(rc.getLocation().add(direction))) {
             rc.fill(rc.getLocation().add(direction));
         } else {
-            // Direction randDirc = Direction.allDirections()[RobotPlayer.rng.nextInt(Direction.allDirections().length)];
             for (Direction otherDirection : Direction.allDirections()) {
                 if (rc.canMove(otherDirection)) {
                     rc.move(otherDirection);
