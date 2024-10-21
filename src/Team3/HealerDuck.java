@@ -31,6 +31,7 @@ public class HealerDuck extends Duck {
 
     @Override
     public void play() throws GameActionException {
+        heal();
         lookForFlag();
         exploreAround();
         move();
