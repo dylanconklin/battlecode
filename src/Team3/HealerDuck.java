@@ -8,16 +8,6 @@ public class HealerDuck extends Duck {
         skill = SkillType.HEAL;
     }
 
-    public void lookForFlag() throws GameActionException {
-        FlagInfo[] flags = rc.senseNearbyFlags(-1, rc.getTeam());
-        for (FlagInfo flag : flags) {
-            if (rc.canPickupFlag(flag.getLocation())) {
-                rc.pickupFlag(flag.getLocation());
-                break;
-            }
-        }
-    }
-
     // this method will return true / false based on the fact if it is healing or not. this return can be utilized
     // to take a move action upon not healing.
 

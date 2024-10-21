@@ -33,6 +33,16 @@ public class Duck {
         updateEnemyRobots(rc);
     }
 
+    public void lookForFlag() throws GameActionException {
+        FlagInfo[] flags = rc.senseNearbyFlags(-1, rc.getTeam());
+        for (FlagInfo flag : flags) {
+            if (rc.canPickupFlag(flag.getLocation())) {
+                rc.pickupFlag(flag.getLocation());
+                break;
+            }
+        }
+    }
+
     public void moveAwayFrom(MapLocation location) throws GameActionException {
         Direction direction = rc.getLocation().directionTo(location).opposite();
         moveToward(direction);
