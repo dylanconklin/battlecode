@@ -32,16 +32,11 @@ public class HealerDuck extends Duck {
 
     public void exploreAround() throws GameActionException {
         MapLocation[] closeByCrumbs = rc.senseNearbyCrumbs(-1);
-        if (closeByCrumbs != null && closeByCrumbs.length > 0) {
-            Direction crumbDir = rc.getLocation().directionTo(closeByCrumbs[0]);
-            if (rc.canMove(crumbDir)) rc.move(crumbDir);
+        while (closeByCrumbs != null && closeByCrumbs.length > 0) {
+            moveToward(closeByCrumbs[0]);
         }
         if (rc.isMovementReady()) {
-            if (rc.isMovementReady()) {
-                if (direction != null && rc.canMove(direction)) rc.move(direction);
-            } else {
-                direction = Direction.allDirections()[RobotPlayer.rng.nextInt(Direction.allDirections().length)];
-            }
+            moveToward(Direction.allDirections()[RobotPlayer.rng.nextInt(Direction.allDirections().length)]);
         }
     }
 
