@@ -28,11 +28,10 @@ public class AttackerDuck extends Duck {
             // TODO: don't move blindly toward locations[0]
             moveToward(allySpawnZoneDirection());
         }
-        if (!rc.hasFlag() && rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
+        if (rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
             // move toward adversary spawn locations
             // TODO: don't move blindly away from locations[0]
-            MapLocation[] locations = rc.getAllySpawnLocations();
-            moveAwayFrom(locations[0]);
+            moveToward(enemySpawnZoneDirection());
         }
     }
 }
