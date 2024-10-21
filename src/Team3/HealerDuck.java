@@ -60,7 +60,7 @@ public class HealerDuck extends Duck {
     public void move() throws GameActionException {
         lookForFlag(); // Look For Flag
         if (rc.hasFlag()) {
-            moveTowardAllySpawnZone();
+            moveToward(allySpawnZoneDirection());
         } else {
             for (Direction otherDirection : Direction.allDirections()) {
                 if (rc.canMove(otherDirection)) {
