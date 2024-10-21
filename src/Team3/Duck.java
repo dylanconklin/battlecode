@@ -42,6 +42,13 @@ public class Duck {
 
     public void moveToward(MapLocation location) throws GameActionException {
         Direction direction = rc.getLocation().directionTo(location);
+        moveToward(direction);
+    }
+
+    public void moveToward(Direction direction) throws GameActionException {
+        if (rc.canFill(rc.getLocation().add(direction))) {
+            rc.fill(rc.getLocation().add(direction));
+        }
         if (rc.canMove(direction)) {
             rc.move(direction);
         }
