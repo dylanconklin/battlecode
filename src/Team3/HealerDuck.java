@@ -11,7 +11,7 @@ public class HealerDuck extends Duck {
         play();
     }
 
-    public static void lookForFlag(RobotController rc) throws GameActionException {
+    public void lookForFlag() throws GameActionException {
         FlagInfo[] flags = rc.senseNearbyFlags(-1, rc.getTeam());
         for (FlagInfo flag : flags) {
             if (rc.canPickupFlag(flag.getLocation())) {
@@ -21,7 +21,7 @@ public class HealerDuck extends Duck {
         }
     }
 
-    private static void moveTowardEnemySpawnZone(RobotController rc) throws GameActionException {
+    private void moveTowardEnemySpawnZone() throws GameActionException {
         MapLocation[] spawnLocs = rc.getAllySpawnLocations();
         MapLocation firstLoc = spawnLocs[0];
         Direction dir = rc.getLocation().directionTo(firstLoc).opposite();
@@ -31,7 +31,7 @@ public class HealerDuck extends Duck {
     // this method will return true / false based on the fact if it is healing or not. this return can be utilized
     // to take a move action upon not healing.
 
-    public static void exploreAround(RobotController rc) throws GameActionException {
+    public void exploreAround() throws GameActionException {
         MapLocation[] closeByCrumbs = rc.senseNearbyCrumbs(-1);
         if (closeByCrumbs != null && closeByCrumbs.length > 0) {
             Direction crumbDir = rc.getLocation().directionTo(closeByCrumbs[0]);
@@ -48,8 +48,8 @@ public class HealerDuck extends Duck {
 
     @Override
     public void play() throws GameActionException {
-        lookForFlag(rc);
-        exploreAround(rc);
+        lookForFlag();
+        exploreAround();
         move();
     }
 
@@ -79,11 +79,11 @@ public class HealerDuck extends Duck {
         } else {
             // move toward adversary spawn locations
             // TODO: don't move blindly away from locations[0]
-            lookForFlag(rc); // Look For Flag
+            lookForFlag(); // Look For Flag
         }
     }
 
-    public void moveToward(RobotController rc, MapLocation location) throws GameActionException {
+    public void moveToward(MapLocation location) throws GameActionException {
         direction = rc.getLocation().directionTo(location);
         if (rc.hasFlag()) {
             moveTowardAllySpawnZone();
