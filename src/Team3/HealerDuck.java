@@ -27,7 +27,7 @@ public class HealerDuck extends Duck {
                 if (rc.canHeal(ally.location)) {
                     rc.heal(ally.location);
                     // add experience while healing.
-                    rc.getExperience(SkillType.HEAL);
+                    rc.getExperience(skill);
                     return true;  // Heal only one ally per turn
                 }
             }
@@ -35,16 +35,20 @@ public class HealerDuck extends Duck {
         return false;
     }
     public void move() throws GameActionException {
-        MapLocation[] locations = rc.getAllySpawnLocations();
-        if (rc.hasFlag()) {
-            // move toward ally spawn locations
-            // TODO: don't move blindly toward locations[0]
-            moveToward(locations[0]);
-        } else {
-            // move toward adversary spawn locations
-            // TODO: don't move blindly away from locations[0]
-            moveAwayFrom(locations[0]);
-        }
+        boolean healed = heal();
+        if (!healed) {
+            MapLocation[] locations = rc.getAllySpawnLocations();
+            if (rc.hasFlag()) {
+                // move toward ally spawn locations
+                // TODO: don't move blindly toward locations[0]
+                moveToward(locations[0]);
+            } else {
+                // move toward adversary spawn locations
+                // TODO: don't move blindly away from locations[0]
+                moveAwayFrom(locations[0]);
+            }
+        }u
+
     }
 
     @Override public void moveToward(MapLocation location) throws GameActionException {
