@@ -8,7 +8,6 @@ public class HealerDuck extends Duck {
     public HealerDuck(RobotController rc) throws GameActionException {
         super(rc);
         skill = SkillType.HEAL;
-        play();
     }
 
     public void lookForFlag() throws GameActionException {
