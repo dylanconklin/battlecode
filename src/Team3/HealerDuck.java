@@ -58,12 +58,10 @@ public class HealerDuck extends Duck {
         RobotInfo[] nearbyAllies = rc.senseNearbyRobots(-1, rc.getTeam());
         for (RobotInfo ally : nearbyAllies) {
             // need to find the constants and replace 100 with that HP constants (better not to use hardcode value)
-            if (ally.getHealth() < 100) {
+            if (ally.getHealth() <= 300) {
                 // Heal the ally if it's within healing range
                 if (rc.canHeal(ally.location)) {
                     rc.heal(ally.location);
-                    // add experience while healing.
-                    rc.getExperience(SkillType.HEAL);
                     return true;  // Heal only one ally per turn
                 }
             }
