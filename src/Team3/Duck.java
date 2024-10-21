@@ -48,7 +48,7 @@ public class Duck {
         if (rc.canBuild(TrapType.EXPLOSIVE, prevLoc) && RobotPlayer.rng.nextInt() % 37 == 1)
             rc.build(TrapType.EXPLOSIVE, prevLoc);
         // We can also move our code into different methods or classes to better organize it!
-        updateEnemyRobots(rc);
+        updateEnemyRobots();
     }
 
     public void lookForFlag() throws GameActionException {
