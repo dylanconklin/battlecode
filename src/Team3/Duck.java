@@ -14,7 +14,7 @@ public class Duck {
         pickupFlag();
 
         while (rc.hasFlag() && rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
-            moveTowardAllySpawnZone();
+            moveToward(allySpawnZoneDirection());
         }
         // Move and attack randomly if no objective.
         Direction dir = RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
