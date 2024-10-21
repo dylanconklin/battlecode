@@ -27,9 +27,6 @@ public class HealerDuck extends Duck {
             closeByCrumbs = rc.senseNearbyCrumbs(-1);
             moveToward(closeByCrumbs[0]);
         }
-        if (rc.isMovementReady()) {
-            moveToward(Direction.allDirections()[RobotPlayer.rng.nextInt(Direction.allDirections().length)]);
-        }
     }
 
     @Override
@@ -58,7 +55,6 @@ public class HealerDuck extends Duck {
     }
 
     public void move() throws GameActionException {
-        lookForFlag(); // Look For Flag
         if (rc.hasFlag()) {
             moveToward(allySpawnZoneDirection());
         } else {
