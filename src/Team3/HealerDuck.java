@@ -53,6 +53,7 @@ public class HealerDuck extends Duck {
                     // add experience while healing.
                     rc.getExperience(skill);
                     didHeal =  true;  // Heal only one ally per turn
+                    break;
                 }
             }
         }
