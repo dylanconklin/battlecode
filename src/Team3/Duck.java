@@ -61,23 +61,30 @@ public class Duck {
         }
     }
 
-    public void moveAwayFrom(MapLocation location) throws GameActionException {
+    public boolean moveAwayFrom(MapLocation location) throws GameActionException {
         Direction direction = rc.getLocation().directionTo(location).opposite();
-        moveToward(direction);
+        return moveToward(direction);
     }
 
-    public void moveToward(MapLocation location) throws GameActionException {
+    public boolean moveToward(MapLocation location) throws GameActionException {
         Direction direction = rc.getLocation().directionTo(location);
-        moveToward(direction);
+        return moveToward(direction);
     }
 
-    public void moveToward(Direction direction) throws GameActionException {
+    public boolean moveToward(Direction direction) throws GameActionException {
+        boolean didMove = false;
         if (rc.canFill(rc.getLocation().add(direction))) {
             rc.fill(rc.getLocation().add(direction));
         }
         if (rc.canMove(direction)) {
+            didMove = true;
             rc.move(direction);
         }
+        return didMove;
+    }
+
+    public static Direction randomDirection() {
+        return Direction.allDirections()[RobotPlayer.rng.nextInt() % Direction.allDirections().length];
     }
 
     public Direction allySpawnZoneDirection() {
