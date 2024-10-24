@@ -87,6 +87,14 @@ public class Duck {
         return Direction.allDirections()[RobotPlayer.rng.nextInt() % Direction.allDirections().length];
     }
 
+    public boolean moveInRandomDirection() throws GameActionException {
+        boolean didMove = false;
+        while (!didMove) {
+            Direction otherDirection = randomDirection();
+            didMove = moveToward(otherDirection);
+        }
+    }
+
     public Direction allySpawnZoneDirection() {
         return rc.getLocation().directionTo(rc.getAllySpawnLocations()[0]);
     }
