@@ -185,7 +185,9 @@ dependencies {
 
   // Scala
   implementation group: 'org.scala-lang', name: 'scala-library', version: '2.11.7'
-  testImplementation group: 'org.scalatest', name: 'scalatest_2.11', version: '3.0.0'
+  //testImplementation group: 'org.scalatest', name: 'scalatest_2.11', version: '3.0.0'
+  testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
+  testImplementation 'org.mockito:mockito-core:3.12.4' // Compatible with Java 8
 }
 
 
