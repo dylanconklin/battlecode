@@ -1,7 +1,6 @@
 package Team3;
 
 import battlecode.common.*;
-import java.util.*;
 
 public class AttackerDuck extends Duck {
     public AttackerDuck(RobotController rc) {
@@ -9,35 +8,34 @@ public class AttackerDuck extends Duck {
         skill = SkillType.ATTACK;
     }
 
-    @Override public void play() throws GameActionException {
-        super.play();
+    @Override
+    public void play() throws GameActionException {
+        attack();
+        lookForFlag();
+        move();
     }
 
-    public void attack() {}
-    public void move() throws GameActionException {
-        MapLocation[] locations = rc.getAllySpawnLocations();
-        if (rc.hasFlag()) {
-            // move toward ally spawn locations
-            // TODO: don't move blindly toward locations[0]
-            moveToward(locations[0]);
-        } else {
-            // move toward adversary spawn locations
-            // TODO: don't move blindly away from locations[0]
-            moveAwayFrom(locations[0]);
+    public void attack() throws GameActionException {
+        RobotInfo[] robotInfos = rc.senseNearbyRobots();
+        Team rcTeam = rc.getTeam();
+        for (RobotInfo robot : robotInfos) {
+             if (rc.canAttack(robot.location)) {
+                rc.attack(robot.location);
+             }
         }
     }
 
-    @Override public void moveToward(MapLocation location) throws GameActionException {
-        Direction direction = rc.getLocation().directionTo(location);
-        if (rc.canMove(direction)) {
-            rc.move(direction);
+    public void move() throws GameActionException {
+        if (rc.getRoundNum() >= GameConstants.SETUP_ROUNDS && (rc.hasFlag() || rc.getHealAmount() <= 300)) {
+            // move toward ally spawn locations
+            // TODO: don't move blindly toward locations[0]
+            moveToward(allySpawnZoneDirection());
+        } else if (rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
+            // move toward adversary spawn locations
+            // TODO: don't move blindly away from locations[0]
+            moveToward(enemySpawnZoneDirection());
         } else {
-            for (Direction otherDirection : Direction.allDirections()) {
-                if (rc.canMove(otherDirection)) {
-                    rc.move(otherDirection);
-                    break;
-                }
-            }
+            moveInRandomDirection();
         }
     }
 }
