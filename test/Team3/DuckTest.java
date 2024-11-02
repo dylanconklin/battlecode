@@ -15,7 +15,7 @@ class DuckTest {
     private RobotController rc;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         rc = mock(RobotController.class);
         duck = new Duck(rc);
     }

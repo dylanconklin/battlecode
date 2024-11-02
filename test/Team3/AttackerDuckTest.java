@@ -9,16 +9,24 @@ import battlecode.common.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
 class AttackerDuckTest {
     private AttackerDuck attackerDuck;
     private RobotController rc;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         rc = mock(RobotController.class);
         attackerDuck = new AttackerDuck(rc);
     }
 
+    @Test
+    public void test() {
+        assertEquals(1, 1);
+    }
+    @Test
+    public void test2() {
+        assertEquals(1, 1);
+    }
 
 }

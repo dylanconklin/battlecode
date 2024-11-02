@@ -66,10 +66,10 @@ public class Duck {
         return moveToward(direction);
     }
 
-    public boolean moveToward(MapLocation location) throws GameActionException {
-        Direction direction = rc.getLocation().directionTo(location);
-        return moveToward(direction);
-    }
+   //  public boolean moveToward(MapLocation location) throws GameActionException {
+   //    Direction direction = rc.getLocation().directionTo(location);
+   //      return moveToward(direction);
+   //   }
 
     public boolean moveToward(Direction direction) throws GameActionException {
         boolean didMove = false;
