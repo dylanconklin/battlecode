@@ -1,8 +1,10 @@
 package Team3;
 
 import battlecode.common.*;
-
 public class HealerDuck extends Duck {
+
+    private static final int MAX_HEALTH_THRESHOLD = 300;
+
     public HealerDuck(RobotController rc) {
         super(rc);
         skill = SkillType.HEAL;
@@ -21,10 +23,11 @@ public class HealerDuck extends Duck {
 
     @Override
     public void play() throws GameActionException {
-        heal();
-        lookForFlag();
-        exploreAround();
-        move();
+        if (!heal()) {  // Try to heal first, and only proceed if no healing was done
+            lookForFlag();
+            exploreAround();
+            move();
+        }
     }
 
     private boolean heal() throws GameActionException {
@@ -34,11 +37,12 @@ public class HealerDuck extends Duck {
         boolean didHeal = false;
         for (RobotInfo ally : nearbyAllies) {
             // need to find the constants and replace 100 with that HP constants (better not to use hardcode value)
-            if (ally.getHealth() <= 300) {
+            if (ally.getHealth() <= MAX_HEALTH_THRESHOLD) {
                 // Heal the ally if it's within healing range
                 if (rc.canHeal(ally.location)) {
                     rc.heal(ally.location);
                     didHeal = true;  // Heal only one ally per turn
+                    break;
                 }
             }
         }
