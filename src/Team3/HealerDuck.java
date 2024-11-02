@@ -53,12 +53,7 @@ public class HealerDuck extends Duck {
         if (rc.hasFlag()) {
             moveToward(allySpawnZoneDirection());
         } else {
-            for (Direction otherDirection : Direction.allDirections()) {
-                if (rc.canMove(otherDirection)) {
-                    rc.move(otherDirection);
-                    break;
-                }
-            }
+            moveInRandomDirection();
         }
     }
 }

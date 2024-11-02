@@ -35,7 +35,7 @@ public class AttackerDuck extends Duck {
             // TODO: don't move blindly away from locations[0]
             moveToward(enemySpawnZoneDirection());
         } else {
-            moveToward(allySpawnZoneDirection());
+            moveInRandomDirection();
         }
     }
 }
