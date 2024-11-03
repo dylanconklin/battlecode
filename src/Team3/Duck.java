@@ -37,7 +37,7 @@ public class Duck {
     }
 
     public void play() throws GameActionException {
-        pickupFlag();
+        lookForFlag();
 
         while (rc.hasFlag() && rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
             moveToward(allySpawnZoneDirection());
@@ -114,11 +114,5 @@ public class Duck {
 
     public Direction enemySpawnZoneDirection() {
         return allySpawnZoneDirection().opposite();
-    }
-
-    public void pickupFlag() throws GameActionException {
-        if (rc.canPickupFlag(rc.getLocation())) {
-            rc.pickupFlag(rc.getLocation());
-        }
     }
 }
