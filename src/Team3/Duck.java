@@ -28,6 +28,12 @@ public class Duck {
         }
     }
 
+    public void setupPlay() throws GameActionException {
+        if (!rc.isSpawned()) {
+            RobotPlayer.spawn(rc);
+        }
+    }
+
     public void play() throws GameActionException {
         pickupFlag();
 

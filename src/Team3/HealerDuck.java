@@ -23,6 +23,7 @@ public class HealerDuck extends Duck {
 
     @Override
     public void play() throws GameActionException {
+        super.setupPlay();
         if (!heal()) {  // Try to heal first, and only proceed if no healing was done
             lookForFlag();
             exploreAround();

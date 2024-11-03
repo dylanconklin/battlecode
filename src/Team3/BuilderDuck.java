@@ -5,10 +5,12 @@ import battlecode.common.*;
 public class BuilderDuck extends Duck {
     public BuilderDuck(RobotController rc) {
         super(rc);
-        skill = SkillType.HEAL;
+        skill = SkillType.BUILD;
     }
 
     @Override
     public void play() throws GameActionException {
+        super.setupPlay();
+        super.play();
     }
 }
