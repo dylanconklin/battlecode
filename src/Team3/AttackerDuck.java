@@ -8,45 +8,34 @@ public class AttackerDuck extends Duck {
         skill = SkillType.ATTACK;
     }
 
-    @Override public void play() throws GameActionException {
-        super.play();
+    @Override
+    public void play() throws GameActionException {
+        attack();
+        lookForFlag();
+        move();
     }
 
     public void attack() throws GameActionException {
         RobotInfo[] robotInfos = rc.senseNearbyRobots();
         Team rcTeam = rc.getTeam();
         for (RobotInfo robot : robotInfos) {
-            if (robot.team != rcTeam && rc.canAttack(robot.location)) {
+             if (rc.canAttack(robot.location)) {
                 rc.attack(robot.location);
-            }
+             }
         }
     }
 
     public void move() throws GameActionException {
-        while (rc.getRoundNum() >= GameConstants.SETUP_ROUNDS && ( rc.hasFlag() || rc.getHealAmount() <= 300 )) {
+        if (rc.getRoundNum() >= GameConstants.SETUP_ROUNDS && (rc.hasFlag() || rc.getHealAmount() <= 300)) {
             // move toward ally spawn locations
             // TODO: don't move blindly toward locations[0]
             moveToward(allySpawnZoneDirection());
-        }
-        if (!rc.hasFlag() && rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
+        } else if (rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
             // move toward adversary spawn locations
             // TODO: don't move blindly away from locations[0]
-            MapLocation[] locations = rc.getAllySpawnLocations();
-            moveAwayFrom(locations[0]);
-        }
-    }
-
-    @Override public void moveToward(MapLocation location) throws GameActionException {
-        Direction direction = rc.getLocation().directionTo(location);
-        if (rc.canMove(direction)) {
-            rc.move(direction);
+            moveToward(enemySpawnZoneDirection());
         } else {
-            for (Direction otherDirection : Direction.allDirections()) {
-                if (rc.canMove(otherDirection)) {
-                    rc.move(otherDirection);
-                    break;
-                }
-            }
+            moveInRandomDirection();
         }
     }
 }

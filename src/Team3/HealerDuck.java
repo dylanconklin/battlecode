@@ -1,21 +1,13 @@
 package Team3;
 
 import battlecode.common.*;
-
 public class HealerDuck extends Duck {
-    public HealerDuck(RobotController rc) throws GameActionException {
+
+    private static final int MAX_HEALTH_THRESHOLD = 300;
+
+    public HealerDuck(RobotController rc) {
         super(rc);
         skill = SkillType.HEAL;
-    }
-
-    public void lookForFlag() throws GameActionException {
-        FlagInfo[] flags = rc.senseNearbyFlags(-1, rc.getTeam());
-        for (FlagInfo flag : flags) {
-            if (rc.canPickupFlag(flag.getLocation())) {
-                rc.pickupFlag(flag.getLocation());
-                break;
-            }
-        }
     }
 
     // this method will return true / false based on the fact if it is healing or not. this return can be utilized
@@ -24,19 +16,18 @@ public class HealerDuck extends Duck {
     public void exploreAround() throws GameActionException {
         MapLocation[] closeByCrumbs = rc.senseNearbyCrumbs(-1);
         while (closeByCrumbs.length > 0) {
-            closeByCrumbs = rc.senseNearbyCrumbs(-1);
             moveToward(closeByCrumbs[0]);
-        }
-        if (rc.isMovementReady()) {
-            moveToward(Direction.allDirections()[RobotPlayer.rng.nextInt(Direction.allDirections().length)]);
+            closeByCrumbs = rc.senseNearbyCrumbs(-1);
         }
     }
 
     @Override
     public void play() throws GameActionException {
-        lookForFlag();
-        exploreAround();
-        move();
+        if (!heal()) {  // Try to heal first, and only proceed if no healing was done
+            lookForFlag();
+            exploreAround();
+            move();
+        }
     }
 
     private boolean heal() throws GameActionException {
@@ -46,13 +37,17 @@ public class HealerDuck extends Duck {
         boolean didHeal = false;
         for (RobotInfo ally : nearbyAllies) {
             // need to find the constants and replace 100 with that HP constants (better not to use hardcode value)
-            if (ally.getHealth() <= 300) {
+            if (ally.getHealth() <= MAX_HEALTH_THRESHOLD) {
                 // Heal the ally if it's within healing range
                 if (rc.canHeal(ally.location)) {
                     rc.heal(ally.location);
+<<<<<<< HEAD
                     // add experience while healing.
                     rc.getExperience(skill);
                     didHeal =  true;  // Heal only one ally per turn
+=======
+                    didHeal = true;  // Heal only one ally per turn
+>>>>>>> dev
                     break;
                 }
             }
@@ -61,16 +56,10 @@ public class HealerDuck extends Duck {
     }
 
     public void move() throws GameActionException {
-        lookForFlag(); // Look For Flag
         if (rc.hasFlag()) {
             moveToward(allySpawnZoneDirection());
         } else {
-            for (Direction otherDirection : Direction.allDirections()) {
-                if (rc.canMove(otherDirection)) {
-                    rc.move(otherDirection);
-                    break;
-                }
-            }
+            moveInRandomDirection();
         }
     }
 }

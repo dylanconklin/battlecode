@@ -10,6 +10,24 @@ public class Duck {
         this.rc = rc;
     }
 
+    public void updateEnemyRobots() throws GameActionException {
+        // Sensing methods can be passed in a radius of -1 to automatically
+        // use the largest possible value.
+        RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
+        if (enemyRobots.length != 0) {
+            // Save an array of locations with enemy robots in them for future use.
+            MapLocation[] enemyLocations = new MapLocation[enemyRobots.length];
+            for (int i = 0; i < enemyRobots.length; i++) {
+                enemyLocations[i] = enemyRobots[i].getLocation();
+            }
+            // Let the rest of our team know how many enemy robots we see!
+            if (rc.canWriteSharedArray(0, enemyRobots.length)) {
+                rc.writeSharedArray(0, enemyRobots.length);
+                int numEnemies = rc.readSharedArray(0);
+            }
+        }
+    }
+
     public void play() throws GameActionException {
         pickupFlag();
 
@@ -30,25 +48,50 @@ public class Duck {
         if (rc.canBuild(TrapType.EXPLOSIVE, prevLoc) && RobotPlayer.rng.nextInt() % 37 == 1)
             rc.build(TrapType.EXPLOSIVE, prevLoc);
         // We can also move our code into different methods or classes to better organize it!
-        updateEnemyRobots(rc);
+        updateEnemyRobots();
     }
 
-    public void moveAwayFrom(MapLocation location) throws GameActionException {
+    public void lookForFlag() throws GameActionException {
+        FlagInfo[] flags = rc.senseNearbyFlags(-1, rc.getTeam());
+        for (FlagInfo flag : flags) {
+            if (rc.canPickupFlag(flag.getLocation())) {
+                rc.pickupFlag(flag.getLocation());
+                break;
+            }
+        }
+    }
+
+    public boolean moveAwayFrom(MapLocation location) throws GameActionException {
         Direction direction = rc.getLocation().directionTo(location).opposite();
-        moveToward(direction);
+        return moveToward(direction);
     }
 
-    public void moveToward(MapLocation location) throws GameActionException {
+    public boolean moveToward(MapLocation location) throws GameActionException {
         Direction direction = rc.getLocation().directionTo(location);
-        moveToward(direction);
+        return moveToward(direction);
     }
 
-    public void moveToward(Direction direction) throws GameActionException {
+    public boolean moveToward(Direction direction) throws GameActionException {
+        boolean didMove = false;
         if (rc.canFill(rc.getLocation().add(direction))) {
             rc.fill(rc.getLocation().add(direction));
         }
         if (rc.canMove(direction)) {
+            didMove = true;
             rc.move(direction);
+        }
+        return didMove;
+    }
+
+    public static Direction randomDirection() {
+        return Direction.allDirections()[RobotPlayer.rng.nextInt() % Direction.allDirections().length];
+    }
+
+    public void moveInRandomDirection() throws GameActionException {
+        boolean didMove = false;
+        while (!didMove) {
+            Direction otherDirection = randomDirection();
+            didMove = moveToward(otherDirection);
         }
     }
 
@@ -58,24 +101,6 @@ public class Duck {
 
     public Direction enemySpawnZoneDirection() {
         return allySpawnZoneDirection().opposite();
-    }
-
-    public static void updateEnemyRobots(RobotController rc) throws GameActionException {
-        // Sensing methods can be passed in a radius of -1 to automatically
-        // use the largest possible value.
-        RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
-        if (enemyRobots.length != 0) {
-            // Save an array of locations with enemy robots in them for future use.
-            MapLocation[] enemyLocations = new MapLocation[enemyRobots.length];
-            for (int i = 0; i < enemyRobots.length; i++) {
-                enemyLocations[i] = enemyRobots[i].getLocation();
-            }
-            // Let the rest of our team know how many enemy robots we see!
-            if (rc.canWriteSharedArray(0, enemyRobots.length)) {
-                rc.writeSharedArray(0, enemyRobots.length);
-                int numEnemies = rc.readSharedArray(0);
-            }
-        }
     }
 
     public void pickupFlag() throws GameActionException {
