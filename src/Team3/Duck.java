@@ -97,12 +97,13 @@ public class Duck {
         return directions;
     }
 
-    public void moveInRandomDirection() throws GameActionException {
+    public boolean moveInRandomDirection() throws GameActionException {
         boolean didMove = false;
         for (Direction dir : randomDirections()) {
             didMove = moveToward(dir);
             if (didMove) break;
         }
+        return didMove;
     }
 
     public Direction allySpawnZoneDirection() {
