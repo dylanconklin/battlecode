@@ -59,14 +59,17 @@ public class Duck {
         updateEnemyRobots();
     }
 
-    public void lookForFlag() throws GameActionException {
+    public boolean lookForFlag() throws GameActionException {
+        boolean pickedUpFlag = false;
         FlagInfo[] flags = rc.senseNearbyFlags(-1, rc.getTeam());
         for (FlagInfo flag : flags) {
             if (rc.canPickupFlag(flag.getLocation())) {
+                pickedUpFlag = true;
                 rc.pickupFlag(flag.getLocation());
                 break;
             }
         }
+        return pickedUpFlag;
     }
 
     public boolean moveAwayFrom(MapLocation location) throws GameActionException {
