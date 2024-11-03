@@ -2,6 +2,8 @@ package Team3;
 
 import battlecode.common.*;
 
+import java.util.*;
+
 public class Duck {
     RobotController rc;
     SkillType skill;
@@ -89,15 +91,17 @@ public class Duck {
         return didMove;
     }
 
-    public static Direction randomDirection() {
-        return Direction.allDirections()[RobotPlayer.rng.nextInt() % Direction.allDirections().length];
+    public static ArrayList<Direction> randomDirections() {
+        ArrayList<Direction> directions = new ArrayList(Arrays.asList(Direction.allDirections()));
+        Collections.shuffle(directions);
+        return directions;
     }
 
     public void moveInRandomDirection() throws GameActionException {
         boolean didMove = false;
-        while (!didMove) {
-            Direction otherDirection = randomDirection();
-            didMove = moveToward(otherDirection);
+        for (Direction dir : randomDirections()) {
+            didMove = moveToward(dir);
+            if (didMove) break;
         }
     }
 
