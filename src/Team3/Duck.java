@@ -107,7 +107,9 @@ public class Duck {
     }
 
     public Direction allySpawnZoneDirection() {
-        return rc.getLocation().directionTo(rc.getAllySpawnLocations()[0]);
+        ArrayList<MapLocation> allySpawnLocations = new ArrayList(Arrays.asList(rc.getAllySpawnLocations()));
+        Collections.shuffle(allySpawnLocations);
+        return rc.getLocation().directionTo(allySpawnLocations.get(0));
     }
 
     public Direction enemySpawnZoneDirection() {
