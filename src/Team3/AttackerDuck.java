@@ -10,6 +10,7 @@ public class AttackerDuck extends Duck {
 
     @Override
     public void play() throws GameActionException {
+        super.setupPlay();
         attack();
         lookForFlag();
         move();
