@@ -1,7 +1,6 @@
 package Team3;
 
 import battlecode.common.*;
-
 import java.util.Random;
 
 /**
