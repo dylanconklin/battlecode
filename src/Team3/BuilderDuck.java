@@ -15,6 +15,7 @@ public class BuilderDuck extends Duck {
 
     @Override
     public void play() throws GameActionException {
+
         lookForFlag();
 
         // Perform actions based on game phase and resources

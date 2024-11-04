@@ -3,6 +3,8 @@ package Team3;
 import battlecode.common.*;
 import java.util.Random;
 
+import java.util.*;
+
 public class Duck {
     RobotController rc;
     SkillType skill;
@@ -33,8 +35,14 @@ public class Duck {
         }
     }
 
+    public void setupPlay() throws GameActionException {
+        if (!rc.isSpawned()) {
+            RobotPlayer.spawn(rc);
+        }
+    }
+
     public void play() throws GameActionException {
-        pickupFlag();
+        lookForFlag();
 
         while (rc.hasFlag() && rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
             moveToward(allySpawnZoneDirection());
@@ -55,6 +63,16 @@ public class Duck {
         // We can also move our code into different methods or classes to better organize it!
         updateEnemyRobots();
     }
+
+
+    public boolean lookForFlag() throws GameActionException {
+        boolean pickedUpFlag = false;
+        FlagInfo[] flags = rc.senseNearbyFlags(-1, rc.getTeam());
+        for (FlagInfo flag : flags) {
+            if (rc.canPickupFlag(flag.getLocation())) {
+                pickedUpFlag = true;
+                rc.pickupFlag(flag.getLocation());
+                break;
 
     public TrapType getRandomTrapType() {
         TrapType[] trapTypes = {TrapType.EXPLOSIVE, TrapType.WATER, TrapType.STUN};
@@ -154,6 +172,7 @@ public class Duck {
                 flagTimer = 0;
             }
         }
+        return pickedUpFlag;
     }
 
 
@@ -178,6 +197,12 @@ public class Duck {
         }
         return didMove;
     }
+
+
+    public static ArrayList<Direction> randomDirections() {
+        ArrayList<Direction> directions = new ArrayList(Arrays.asList(Direction.allDirections()));
+        Collections.shuffle(directions);
+        return directions;
 
     private Direction[] getPrioritizedDirections(Direction primaryDirection) {
         switch (primaryDirection) {
@@ -204,27 +229,25 @@ public class Duck {
 
     public static Direction randomDirection() {
         return Direction.allDirections()[RobotPlayer.rng.nextInt() % Direction.allDirections().length];
+
     }
 
-    public void moveInRandomDirection() throws GameActionException {
+    public boolean moveInRandomDirection() throws GameActionException {
         boolean didMove = false;
-        while (!didMove) {
-            Direction otherDirection = randomDirection();
-            didMove = moveToward(otherDirection);
+        for (Direction dir : randomDirections()) {
+            didMove = moveToward(dir);
+            if (didMove) break;
         }
+        return didMove;
     }
 
     public Direction allySpawnZoneDirection() {
-        return rc.getLocation().directionTo(rc.getAllySpawnLocations()[0]);
+        ArrayList<MapLocation> allySpawnLocations = new ArrayList(Arrays.asList(rc.getAllySpawnLocations()));
+        Collections.shuffle(allySpawnLocations);
+        return rc.getLocation().directionTo(allySpawnLocations.get(0));
     }
 
     public Direction enemySpawnZoneDirection() {
         return allySpawnZoneDirection().opposite();
-    }
-
-    public void pickupFlag() throws GameActionException {
-        if (rc.canPickupFlag(rc.getLocation())) {
-            rc.pickupFlag(rc.getLocation());
-        }
     }
 }
