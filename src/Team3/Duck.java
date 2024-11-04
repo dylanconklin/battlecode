@@ -84,7 +84,7 @@ public class Duck {
     }
 
     public static ArrayList<Direction> randomDirections() {
-        ArrayList<Direction> directions = new ArrayList(Arrays.asList(Direction.allDirections()));
+        ArrayList<Direction> directions = new ArrayList<Direction>(Arrays.asList(Direction.allDirections()));
         Collections.shuffle(directions);
         return directions;
     }
@@ -99,7 +99,7 @@ public class Duck {
     }
 
     public Direction allySpawnZoneDirection() {
-        ArrayList<MapLocation> allySpawnLocations = new ArrayList(Arrays.asList(rc.getAllySpawnLocations()));
+        ArrayList<MapLocation> allySpawnLocations = new ArrayList<MapLocation>(Arrays.asList(rc.getAllySpawnLocations()));
         Collections.shuffle(allySpawnLocations);
         return rc.getLocation().directionTo(allySpawnLocations.get(0));
     }
