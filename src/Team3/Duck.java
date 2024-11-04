@@ -113,6 +113,7 @@ public class Duck {
         return moveToward(direction);
     }
 
+
     public boolean moveToward(Direction direction) throws GameActionException {
         boolean didMove = false;
         if (rc.canFill(rc.getLocation().add(direction))) {

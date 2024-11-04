@@ -14,9 +14,10 @@ public class AttackerDuck extends Duck {
         attack();
         lookForFlag();
         move();
+
     }
 
-    public void attack() throws GameActionException {
+    public int attack() throws GameActionException {
         RobotInfo[] robotInfos = rc.senseNearbyRobots();
         Team rcTeam = rc.getTeam();
         for (RobotInfo robot : robotInfos) {
@@ -24,9 +25,10 @@ public class AttackerDuck extends Duck {
                 rc.attack(robot.location);
              }
         }
+    return robotInfos.length;
     }
 
-    public void move() throws GameActionException {
+    public int move() throws GameActionException {
         if (rc.getRoundNum() >= GameConstants.SETUP_ROUNDS && (rc.hasFlag() || rc.getHealAmount() <= 300)) {
             // move toward ally spawn locations
             // TODO: don't move blindly toward locations[0]
@@ -38,5 +40,6 @@ public class AttackerDuck extends Duck {
         } else {
             moveInRandomDirection();
         }
+        return 1;
     }
 }

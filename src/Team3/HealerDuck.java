@@ -13,12 +13,18 @@ public class HealerDuck extends Duck {
     // this method will return true / false based on the fact if it is healing or not. this return can be utilized
     // to take a move action upon not healing.
 
-    public void exploreAround() throws GameActionException {
+    public int exploreAround() throws GameActionException {
         MapLocation[] closeByCrumbs = rc.senseNearbyCrumbs(-1);
-        while (closeByCrumbs.length > 0) {
-            moveToward(closeByCrumbs[0]);
+        if (closeByCrumbs != null && closeByCrumbs.length > 0) {
+            while (closeByCrumbs.length > 0) {
+            moveToward(Direction.allDirections()[0]);
             closeByCrumbs = rc.senseNearbyCrumbs(-1);
+            return 1;
         }
+        }else{
+            return 0;
+        }
+    return 0;
     }
 
     @Override
@@ -31,12 +37,13 @@ public class HealerDuck extends Duck {
         }
     }
 
-    private boolean heal() throws GameActionException {
+    public boolean heal() throws GameActionException {
         // heal () should be called from move method.
         // sensing all the robots near in its vision to heal. it will heal only the ally robots.
         RobotInfo[] nearbyAllies = rc.senseNearbyRobots(-1, rc.getTeam());
         boolean didHeal = false;
-        for (RobotInfo ally : nearbyAllies) {
+        if(nearbyAllies != null && nearbyAllies.length > 0) {
+            for (RobotInfo ally : nearbyAllies) {
             // need to find the constants and replace 100 with that HP constants (better not to use hardcode value)
             if (ally.getHealth() <= MAX_HEALTH_THRESHOLD) {
                 // Heal the ally if it's within healing range
@@ -46,7 +53,7 @@ public class HealerDuck extends Duck {
                     break;
                 }
             }
-        }
+        }}
         return didHeal;
     }
 
