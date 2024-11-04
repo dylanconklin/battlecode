@@ -1,6 +1,7 @@
 package Team3;
 
 import battlecode.common.*;
+
 import java.util.Random;
 
 import java.util.*;
@@ -64,7 +65,6 @@ public class Duck {
         updateEnemyRobots();
     }
 
-
     public boolean lookForFlag() throws GameActionException {
         boolean pickedUpFlag = false;
         FlagInfo[] flags = rc.senseNearbyFlags(-1, rc.getTeam());
@@ -73,11 +73,75 @@ public class Duck {
                 pickedUpFlag = true;
                 rc.pickupFlag(flag.getLocation());
                 break;
-
-    public TrapType getRandomTrapType() {
-        TrapType[] trapTypes = {TrapType.EXPLOSIVE, TrapType.WATER, TrapType.STUN};
-        return trapTypes[rng.nextInt(trapTypes.length)];
+            }
+        }
+        return pickedUpFlag;
     }
+
+    public boolean moveAwayFrom(MapLocation location) throws GameActionException {
+        Direction direction = rc.getLocation().directionTo(location).opposite();
+        return moveToward(direction);
+    }
+
+    public static ArrayList<Direction> randomDirections() {
+        ArrayList<Direction> directions = new ArrayList(Arrays.asList(Direction.allDirections()));
+        Collections.shuffle(directions);
+        return directions;
+    }
+
+    public boolean moveInRandomDirection() throws GameActionException {
+        boolean didMove = false;
+        for (Direction dir : randomDirections()) {
+            didMove = moveToward(dir);
+            if (didMove) break;
+        }
+        return didMove;
+    }
+
+    public Direction allySpawnZoneDirection() {
+        ArrayList<MapLocation> allySpawnLocations = new ArrayList(Arrays.asList(rc.getAllySpawnLocations()));
+        Collections.shuffle(allySpawnLocations);
+        return rc.getLocation().directionTo(allySpawnLocations.get(0));
+    }
+
+    public Direction enemySpawnZoneDirection() {
+        return allySpawnZoneDirection().opposite();
+    }
+
+    public boolean moveToward(MapLocation location) throws GameActionException {
+        Direction direction = rc.getLocation().directionTo(location);
+        return moveToward(direction);
+    }
+
+    public boolean moveToward(Direction direction) throws GameActionException {
+        boolean didMove = false;
+        if (rc.canFill(rc.getLocation().add(direction))) {
+            rc.fill(rc.getLocation().add(direction));
+        }
+        if (rc.canMove(direction)) {
+            didMove = true;
+            rc.move(direction);
+        }
+        return didMove;
+    }
+
+
+//    public boolean lookForFlag() throws GameActionException {
+//        boolean pickedUpFlag = false;
+//        FlagInfo[] flags = rc.senseNearbyFlags(-1, rc.getTeam());
+//        for (FlagInfo flag : flags) {
+//            if (rc.canPickupFlag(flag.getLocation())) {
+//                pickedUpFlag = true;
+//                rc.pickupFlag(flag.getLocation());
+//                break;
+//
+//                public TrapType getRandomTrapType () {
+//                    TrapType[] trapTypes = {TrapType.EXPLOSIVE, TrapType.WATER, TrapType.STUN};
+//                    return trapTypes[rng.nextInt(trapTypes.length)];
+//                }
+//            }
+//        }
+//    }
 
     public boolean hasCooldown() {
         return cooldown > 0;
@@ -128,81 +192,50 @@ public class Duck {
 //        }
 //    }
 
-    public void lookForFlag() throws GameActionException {
-        if (rc.hasFlag()) {
-            // Reset flag timer if the Duck is holding a flag
-            flagTimer = 0;
 
-            // Check for nearby enemies
-            RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(GameConstants.ATTACK_RADIUS_SQUARED, rc.getTeam().opponent());
+//    public void lookForFlag() throws GameActionException {
+//        if (rc.hasFlag()) {
+//            // Reset flag timer if the Duck is holding a flag
+//            flagTimer = 0;
+//            // Check for nearby enemies
+//            RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(GameConstants.ATTACK_RADIUS_SQUARED, rc.getTeam().opponent());
+//
+//            // Drop the flag as a signal if enemies are close and dropping is allowed
+//            if (nearbyEnemies.length > 0 && rc.canDropFlag(rc.getLocation())) {
+//                rc.dropFlag(rc.getLocation());
+//                applyCooldown(GameConstants.PICKUP_DROP_COOLDOWN);
+//            }
+//        } else {
+//            // Increment flag timer when the Duck is not holding a flag
+//            flagTimer++;
+//            // Attempt to pick up a flag if the timer exceeds the threshold
+//            if (flagTimer >= FLAG_DROP_TIME) {
+//                // Sense flags for the team within unlimited range
+//                FlagInfo[] flags = rc.senseNearbyFlags(-1, rc.getTeam());
+//                FlagInfo closestFlag = null;
+//                int closestDistance = Integer.MAX_VALUE;
+//                // Find the nearest flag that can be picked up
+//                for (FlagInfo flag : flags) {
+//                    int distance = rc.getLocation().distanceSquaredTo(flag.getLocation());
+//                    if (distance < closestDistance && rc.canPickupFlag(flag.getLocation()) && !hasCooldown()) {
+//                        closestFlag = flag;
+//                        closestDistance = distance;
+//                    }
+//                }
+//
+//                // Pick up the nearest flag if available
+//                if (closestFlag != null) {
+//                    rc.pickupFlag(closestFlag.getLocation());
+//                    //broadcastFlagLocation(closestFlag.getLocation());
+//                    applyCooldown(GameConstants.PICKUP_DROP_COOLDOWN);
+//                }
+//                // Reset the flag timer after attempting to pick up a flag
+//                flagTimer = 0;
+//            }
+//        }
+//        return pickedUpFlag;
+//    }
 
-            // Drop the flag as a signal if enemies are close and dropping is allowed
-            if (nearbyEnemies.length > 0 && rc.canDropFlag(rc.getLocation())) {
-                rc.dropFlag(rc.getLocation());
-                applyCooldown(GameConstants.PICKUP_DROP_COOLDOWN);
-            }
-        } else {
-            // Increment flag timer when the Duck is not holding a flag
-            flagTimer++;
-
-            // Attempt to pick up a flag if the timer exceeds the threshold
-            if (flagTimer >= FLAG_DROP_TIME) {
-                // Sense flags for the team within unlimited range
-                FlagInfo[] flags = rc.senseNearbyFlags(-1, rc.getTeam());
-                FlagInfo closestFlag = null;
-                int closestDistance = Integer.MAX_VALUE;
-
-                // Find the nearest flag that can be picked up
-                for (FlagInfo flag : flags) {
-                    int distance = rc.getLocation().distanceSquaredTo(flag.getLocation());
-                    if (distance < closestDistance && rc.canPickupFlag(flag.getLocation()) && !hasCooldown()) {
-                        closestFlag = flag;
-                        closestDistance = distance;
-                    }
-                }
-
-                // Pick up the nearest flag if available
-                if (closestFlag != null) {
-                    rc.pickupFlag(closestFlag.getLocation());
-                    //broadcastFlagLocation(closestFlag.getLocation());
-                    applyCooldown(GameConstants.PICKUP_DROP_COOLDOWN);
-                }
-
-                // Reset the flag timer after attempting to pick up a flag
-                flagTimer = 0;
-            }
-        }
-        return pickedUpFlag;
-    }
-
-
-    public boolean moveAwayFrom(MapLocation location) throws GameActionException {
-        Direction direction = rc.getLocation().directionTo(location).opposite();
-        return moveToward(direction);
-    }
-
-    public boolean moveToward(MapLocation location) throws GameActionException {
-        Direction direction = rc.getLocation().directionTo(location);
-        return moveToward(direction);
-    }
-
-    public boolean moveToward(Direction direction) throws GameActionException {
-        boolean didMove = false;
-        if (rc.canFill(rc.getLocation().add(direction))) {
-            rc.fill(rc.getLocation().add(direction));
-        }
-        if (rc.canMove(direction)) {
-            didMove = true;
-            rc.move(direction);
-        }
-        return didMove;
-    }
-
-
-    public static ArrayList<Direction> randomDirections() {
-        ArrayList<Direction> directions = new ArrayList(Arrays.asList(Direction.allDirections()));
-        Collections.shuffle(directions);
-        return directions;
 
     private Direction[] getPrioritizedDirections(Direction primaryDirection) {
         switch (primaryDirection) {
@@ -232,22 +265,6 @@ public class Duck {
 
     }
 
-    public boolean moveInRandomDirection() throws GameActionException {
-        boolean didMove = false;
-        for (Direction dir : randomDirections()) {
-            didMove = moveToward(dir);
-            if (didMove) break;
-        }
-        return didMove;
-    }
 
-    public Direction allySpawnZoneDirection() {
-        ArrayList<MapLocation> allySpawnLocations = new ArrayList(Arrays.asList(rc.getAllySpawnLocations()));
-        Collections.shuffle(allySpawnLocations);
-        return rc.getLocation().directionTo(allySpawnLocations.get(0));
-    }
-
-    public Direction enemySpawnZoneDirection() {
-        return allySpawnZoneDirection().opposite();
-    }
 }
+
