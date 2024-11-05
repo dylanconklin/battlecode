@@ -52,7 +52,7 @@ public class HealerDuck extends Duck {
             System.out.println("DBG: team is null");
             return false;
         }
-
+        MapLocation ml = rc.getLocation();
         RobotInfo[] nearbyAllies = rc.senseNearbyRobots(-1, t);
 
         //System.out.println("DBG: Heal starts" +nearbyAllies.length);
