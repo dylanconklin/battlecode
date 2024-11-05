@@ -7,10 +7,6 @@ public class HealerDuck extends Duck {
 
     public HealerDuck(RobotController rc) {
         super(rc);
-        if(rc==null)
-        {
-            System.out.println("DBG: rc null");
-        }
         skill = SkillType.HEAL;
         System.out.println("DBG: HealDuck");
     }
@@ -31,14 +27,20 @@ public class HealerDuck extends Duck {
         MapLocation ml = rc.getLocation();
         if (ml == null)
         {
-            System.out.println("DBG: ml is null");
+            System.out.println("DBG: H: ml is null");
             return;
         }
+        heal();
+        lookForFlag();
+        move();
+        /*
         if (!heal()) {  // Try to heal first, and only proceed if no healing was done
             lookForFlag();
             exploreAround();
             move();
         }
+
+         */
     }
 
     private boolean heal() throws GameActionException {
@@ -47,11 +49,6 @@ public class HealerDuck extends Duck {
         // sensing all the robots near in its vision to heal. it will heal only the ally robots.
 
         Team t = rc.getTeam();
-        if (t== null)
-        {
-            System.out.println("DBG: team is null");
-            return false;
-        }
         MapLocation ml = rc.getLocation();
         RobotInfo[] nearbyAllies = rc.senseNearbyRobots(-1, t);
 
@@ -81,10 +78,25 @@ public class HealerDuck extends Duck {
     }
 
     public void move() throws GameActionException {
+        if (rc.getRoundNum() >= GameConstants.SETUP_ROUNDS ) {
+            // move toward ally spawn locations
+            // TODO: don't move blindly toward locations[0]
+            moveToward(allySpawnZoneDirection());
+        } else if (rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
+            // move toward adversary spawn locations
+            // TODO: don't move blindly away from locations[0]
+            moveToward(enemySpawnZoneDirection());
+        } else {
+            moveInRandomDirection();
+        }
+
+        /*
         if (rc.hasFlag()) {
             moveToward(allySpawnZoneDirection());
         } else {
             moveInRandomDirection();
         }
+
+         */
     }
 }
