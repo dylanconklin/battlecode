@@ -1,7 +1,6 @@
 package Team3;
 
 import battlecode.common.*;
-
 import java.util.Random;
 
 /**
@@ -17,13 +16,14 @@ public strictfp class RobotPlayer {
 
     // Make sure you spawn your robot in before you attempt to take any actions!
     // Robots not spawned in do not have vision of any tiles and cannot perform any actions.
-    public static void spawn(RobotController rc) throws GameActionException {
+    public static Duck spawn(RobotController rc) throws GameActionException {
         while (!rc.isSpawned()) {
             MapLocation[] spawnLocs = rc.getAllySpawnLocations();
             // Pick a random spawn location to attempt spawning in.
             MapLocation randomLoc = spawnLocs[rng.nextInt(spawnLocs.length)];
             if (rc.canSpawn(randomLoc)) rc.spawn(randomLoc);
         }
+        return rng.nextBoolean() ? new AttackerDuck(rc) : rng.nextBoolean() ? new HealerDuck(rc) : new BuilderDuck(rc);
     }
 
     /**
@@ -34,18 +34,16 @@ public strictfp class RobotPlayer {
      **/
     @SuppressWarnings("unused")
     public static void run(RobotController rc) {
+        Duck duck = null;
+        try {
+            duck = spawn(rc);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         while (true) {
             turnCount++;
-            Duck duck;
-
             try {
-                spawn(rc);
-
-                if (rng.nextBoolean()) {
-                    duck = new AttackerDuck(rc);
-                } else {
-                    duck = new HealerDuck(rc);
-                }
+                assert duck != null;
                 duck.play();
             } catch (Exception e) {
                 e.printStackTrace();
