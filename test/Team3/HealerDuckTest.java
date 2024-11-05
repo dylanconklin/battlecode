@@ -22,7 +22,6 @@ public class HealerDuckTest {
     public void setUp() throws GameActionException {
         rc = mock(RobotController.class);
         healerDuck = new HealerDuck(rc);
-
     }
 
 

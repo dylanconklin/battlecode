@@ -19,13 +19,16 @@ public class AttackerDuck extends Duck {
 
     public int attack() throws GameActionException {
         RobotInfo[] robotInfos = rc.senseNearbyRobots();
-        Team rcTeam = rc.getTeam();
-        for (RobotInfo robot : robotInfos) {
-             if (rc.canAttack(robot.location)) {
-                rc.attack(robot.location);
-             }
-        }
-    return robotInfos.length;
+        if (robotInfos != null) {
+            //  Team rcTeam = rc.getTeam();
+            for (RobotInfo robot : robotInfos) {
+                if (rc.canAttack(robot.location)) {
+                    rc.attack(robot.location);
+                }
+            }
+            return robotInfos.length;
+        } else
+            return 0;
     }
 
     public int move() throws GameActionException {

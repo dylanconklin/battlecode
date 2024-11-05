@@ -103,20 +103,22 @@ public class BuilderDuck extends Duck {
         }
     }
 
-    private void gatherResources() throws GameActionException {
+    public int gatherResources() throws GameActionException {
         // System.out.println("Exploring and gathering resources...");
 
         // Check for resources within sensing radius
         MapLocation resourceLocation = findNearestResource();
         if (resourceLocation != null) {
             moveToward(resourceLocation); // Move towards the resource location
+            return 0;
         } else {
             moveInRandomDirection(); // Explore randomly if no resources are detected
+            return 1;
         }
     }
 
     // Helper method to find the nearest resource (simplified example)
-    private MapLocation findNearestResource() {
+    public MapLocation findNearestResource() {
         // Placeholder: Implement logic to detect nearby resources and return location
         return null;
     }
@@ -124,12 +126,13 @@ public class BuilderDuck extends Duck {
     @Override
     public void collectCrumbs() throws GameActionException {
         MapLocation[] crumbLocations = rc.senseNearbyCrumbs(GameConstants.VISION_RADIUS_SQUARED);
-
+    if(crumbLocations != null) {
         if (crumbLocations.length > 0) {
             moveToward(crumbLocations[0]); // Move towards the nearest crumb location
         } else {
             moveInRandomDirection(); // Explore randomly if no crumbs are nearby
         }
+    }
     }
 
     public void placeTrap(TrapType trapType, MapLocation targetLocation) throws GameActionException {
