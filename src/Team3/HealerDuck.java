@@ -7,7 +7,12 @@ public class HealerDuck extends Duck {
 
     public HealerDuck(RobotController rc) {
         super(rc);
+        if(rc==null)
+        {
+            System.out.println("DBG: rc null");
+        }
         skill = SkillType.HEAL;
+        System.out.println("DBG: HealDuck");
     }
 
     // this method will return true / false based on the fact if it is healing or not. this return can be utilized
@@ -23,6 +28,12 @@ public class HealerDuck extends Duck {
 
     @Override
     public void play() throws GameActionException {
+        MapLocation ml = rc.getLocation();
+        if (ml == null)
+        {
+            System.out.println("DBG: ml is null");
+            return;
+        }
         if (!heal()) {  // Try to heal first, and only proceed if no healing was done
             lookForFlag();
             exploreAround();
@@ -32,26 +43,40 @@ public class HealerDuck extends Duck {
 
     private boolean heal() throws GameActionException {
         // heal () should be called from move method.
+
         // sensing all the robots near in its vision to heal. it will heal only the ally robots.
-        RobotInfo[] nearbyAllies = rc.senseNearbyRobots(-1, rc.getTeam());
+
+        Team t = rc.getTeam();
+        if (t== null)
+        {
+            System.out.println("DBG: team is null");
+            return false;
+        }
+
+        RobotInfo[] nearbyAllies = rc.senseNearbyRobots(-1, t);
+
+        //System.out.println("DBG: Heal starts" +nearbyAllies.length);
         boolean didHeal = false;
-        for (RobotInfo ally : nearbyAllies) {
-            // need to find the constants and replace 100 with that HP constants (better not to use hardcode value)
-            if (ally.getHealth() <= MAX_HEALTH_THRESHOLD) {
-                // Heal the ally if it's within healing range
-                if (rc.canHeal(ally.location)) {
-                    rc.heal(ally.location);
-<<<<<<< HEAD
-                    // add experience while healing.
-                    rc.getExperience(skill);
-                    didHeal =  true;  // Heal only one ally per turn
-=======
-                    didHeal = true;  // Heal only one ally per turn
->>>>>>> dev
-                    break;
+        if (nearbyAllies != null)
+        {
+            for (RobotInfo ally : nearbyAllies) {
+                //System.out.println("DBG: Heal stats" +ally.getHealth());
+                // need to find the constants and replace 100 with that HP constants (better not to use hardcode value)
+                if (ally.getHealth() <= MAX_HEALTH_THRESHOLD) {
+                    System.out.println("DBG: Heal needs" + ally.location + "can heal? " + rc.canHeal(ally.location));
+                    // Heal the ally if it's within healing range
+                    if (rc.canHeal(ally.location)) {
+                        rc.heal(ally.location);
+                        System.out.println("DBG: Heal done");
+                        // add experience while healing.
+                        rc.getExperience(skill);
+                        didHeal = true;
+                        break;
+                    }
                 }
             }
         }
+
         return didHeal;
     }
 

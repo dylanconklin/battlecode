@@ -24,6 +24,8 @@ public strictfp class RobotPlayer {
             MapLocation randomLoc = spawnLocs[rng.nextInt(spawnLocs.length)];
             if (rc.canSpawn(randomLoc)) rc.spawn(randomLoc);
         }
+        System.out.println("testing");
+
         return rng.nextBoolean() ? new AttackerDuck(rc) : new HealerDuck(rc);
     }
 

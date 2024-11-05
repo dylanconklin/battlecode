@@ -84,7 +84,9 @@ public class Duck {
     }
 
     public static Direction randomDirection() {
-        return Direction.allDirections()[RobotPlayer.rng.nextInt() % Direction.allDirections().length];
+        int no_directions = Direction.allDirections().length;
+        int ranindx = Math.abs(RobotPlayer.rng.nextInt()) % no_directions;
+        return Direction.allDirections()[ranindx];
     }
 
     public void moveInRandomDirection() throws GameActionException {
