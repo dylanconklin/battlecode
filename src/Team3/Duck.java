@@ -260,12 +260,5 @@ public class Duck {
                 return new Direction[]{primaryDirection};
         }
     }
-
-    public static Direction randomDirection() {
-        return Direction.allDirections()[RobotPlayer.rng.nextInt() % Direction.allDirections().length];
-
-    }
-
-
 }
 

@@ -92,13 +92,16 @@ public class BuilderDuck extends Duck {
             }
         } else {
             // No enemies nearby; focus on creating barriers or stun traps
-            Direction randomDir = randomDirection();
-            MapLocation targetLocation = rc.getLocation().add(randomDir);
+            for (Direction randomDir : randomDirections()) {
+                MapLocation targetLocation = rc.getLocation().add(randomDir);
 
-            if (rc.getCrumbs() >= GameConstants.FILL_COST && rc.canBuild(TrapType.WATER, targetLocation) && !hasCooldown()) {
-                placeTrap(TrapType.WATER, targetLocation); // Create water obstacles
-            } else if (rc.getCrumbs() >= GameConstants.DIG_COST && rc.canBuild(TrapType.STUN, targetLocation) && !hasCooldown()) {
-                placeTrap(TrapType.STUN, targetLocation); // Create stun traps to hinder enemies
+                if (rc.getCrumbs() >= GameConstants.FILL_COST && rc.canBuild(TrapType.WATER, targetLocation) && !hasCooldown()) {
+                    placeTrap(TrapType.WATER, targetLocation); // Create water obstacles
+                    break;
+                } else if (rc.getCrumbs() >= GameConstants.DIG_COST && rc.canBuild(TrapType.STUN, targetLocation) && !hasCooldown()) {
+                    placeTrap(TrapType.STUN, targetLocation); // Create stun traps to hinder enemies
+                    break;
+                }
             }
         }
     }
