@@ -354,32 +354,3 @@ task zipForSubmit(type: Zip) {
   destinationDirectory = project.projectDir
   from sourceSets.main.allSource
 }
-
-task runWithGUI(type: JavaExec) {
-  description 'Runs a match and starts the client GUI.'
-  group 'battlecode'
-  dependsOn build
-
-  mainClass = 'battlecode.server.Main'
-  classpath = sourceSets.main.runtimeClasspath
-  args = ['-c=-']
-  jvmArgs = [
-          '-Dbc.server.wait-for-client=' + (project.findProperty('waitForClient') ?: 'true'),  // Waits for client connection
-          '-Dbc.server.mode=visual',  // Set to visual mode to enable GUI
-          '-Dbc.server.map-path=maps',
-          '-Dbc.server.robot-player-to-system-out=' + (project.findProperty('outputVerbose') ?: 'true'),
-          '-Dbc.server.debug=false',
-          '-Dbc.engine.debug-methods=' + (project.findProperty('debug') ?: 'false'),
-          '-Dbc.engine.show-indicators=' + (project.findProperty('showIndicators') ?: 'true'),
-          '-Dbc.game.team-a=' + project.property('teamA'),
-          '-Dbc.game.team-b=' + project.property('teamB'),
-          '-Dbc.game.team-a.url=' + (project.findProperty('classLocationA') ?: defaultClassLocation),
-          '-Dbc.game.team-b.url=' + (project.findProperty('classLocationB') ?: defaultClassLocation),
-          '-Dbc.game.team-a.package=' + (project.findProperty('packageNameA') ?: project.property('teamA')),
-          '-Dbc.game.team-b.package=' + (project.findProperty('packageNameB') ?: project.property('teamB')),
-          '-Dbc.game.maps=' + project.property('maps'),
-          '-Dbc.server.validate-maps=' + project.property('validateMaps'),
-          '-Dbc.server.alternate-order=' + project.property('alternateOrder'),
-          '-Dbc.server.save-file=' + (project.findProperty('replay') ?: defaultReplay),
-  ]
-}
