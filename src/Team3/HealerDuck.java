@@ -14,12 +14,15 @@ public class HealerDuck extends Duck {
 
     // this method will return true / false based on the fact if it is healing or not. this return can be utilized
 
-    public void exploreAround() throws GameActionException {
+    public int exploreAround() throws GameActionException {
+        int found_crumbs = 0 ;
         MapLocation[] closeByCrumbs = rc.senseNearbyCrumbs(-1);
         while (closeByCrumbs.length > 0) {
             moveToward(closeByCrumbs[0]);
             closeByCrumbs = rc.senseNearbyCrumbs(-1);
+            found_crumbs++;
         }
+        return found_crumbs;
     }
 
     @Override
@@ -40,7 +43,7 @@ public class HealerDuck extends Duck {
 
     }
 
-    private boolean heal_ally() throws GameActionException {
+    public boolean heal_ally() throws GameActionException {
         // heal () should be called from move method.
 
         // sensing all the robots near in its vision to heal. it will heal only the ally robots.
