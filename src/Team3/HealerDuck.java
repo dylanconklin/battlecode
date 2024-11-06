@@ -28,7 +28,7 @@ public class HealerDuck extends Duck {
     @Override
     public void play() throws GameActionException {
         super.setupPlay();
-        MapLocation ml = rc.getLocation();
+
         if (!heal()) {  // Try to heal first, and only proceed if no healing was done
             lookForFlag();
             exploreAround();
@@ -41,14 +41,18 @@ public class HealerDuck extends Duck {
         // sensing all the robots near in its vision to heal. it will heal only the ally robots.
         RobotInfo[] nearbyAllies = rc.senseNearbyRobots(-1, rc.getTeam());
         boolean didHeal = false;
+
         if(nearbyAllies != null && nearbyAllies.length > 0) {
             for (RobotInfo ally : nearbyAllies) {
+                int b = ally.getHealth();
             // need to find the constants and replace 100 with that HP constants (better not to use hardcode value)
             if (ally.getHealth() <= MAX_HEALTH_THRESHOLD) {
                 // Heal the ally if it's within healing range
                 if (rc.canHeal(ally.location)) {
                     rc.heal(ally.location);
                     didHeal = true;  // Heal only one ally per turn
+                    int a = ally.getHealth();
+                    //System.out.println("Healing done: "  +b+ " : " + a +":"+ally.location +":"+rc.getLocation()+":"+rc.getExperience(skill));
                     break;
                 }
             }
