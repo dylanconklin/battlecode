@@ -2,9 +2,17 @@ package Team3;
 
 import battlecode.common.*;
 
+import java.util.Random;
+
+import java.util.*;
+
 public class Duck {
     RobotController rc;
     SkillType skill;
+    private static final Random rng = new Random();
+    private int cooldown = 0;
+    protected static final int FLAG_DROP_TIME = GameConstants.FLAG_DROPPED_RESET_ROUNDS;
+    protected static int flagTimer = 0;
 
     public Duck(RobotController rc) {
         this.rc = rc;
@@ -28,8 +36,14 @@ public class Duck {
         }
     }
 
+    public void setupPlay() throws GameActionException {
+        if (!rc.isSpawned()) {
+            RobotPlayer.spawn(rc);
+        }
+    }
+
     public void play() throws GameActionException {
-        pickupFlag();
+        lookForFlag();
 
         while (rc.hasFlag() && rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
             moveToward(allySpawnZoneDirection());
@@ -51,14 +65,17 @@ public class Duck {
         updateEnemyRobots();
     }
 
-    public void lookForFlag() throws GameActionException {
+    public boolean lookForFlag() throws GameActionException {
+        boolean pickedUpFlag = false;
         FlagInfo[] flags = rc.senseNearbyFlags(-1, rc.getTeam());
         for (FlagInfo flag : flags) {
             if (rc.canPickupFlag(flag.getLocation())) {
+                pickedUpFlag = true;
                 rc.pickupFlag(flag.getLocation());
                 break;
             }
         }
+        return pickedUpFlag;
     }
 
     public boolean moveAwayFrom(MapLocation location) throws GameActionException {
@@ -66,10 +83,36 @@ public class Duck {
         return moveToward(direction);
     }
 
+    public static ArrayList<Direction> randomDirections() {
+        ArrayList<Direction> directions = new ArrayList<Direction>(Arrays.asList(Direction.allDirections()));
+        Collections.shuffle(directions);
+        return directions;
+    }
+
+    public boolean moveInRandomDirection() throws GameActionException {
+        boolean didMove = false;
+        for (Direction dir : randomDirections()) {
+            didMove = moveToward(dir);
+            if (didMove) break;
+        }
+        return didMove;
+    }
+
+    public Direction allySpawnZoneDirection() {
+        ArrayList<MapLocation> allySpawnLocations = new ArrayList<MapLocation>(Arrays.asList(rc.getAllySpawnLocations()));
+        Collections.shuffle(allySpawnLocations);
+        return rc.getLocation().directionTo(allySpawnLocations.get(0));
+    }
+
+    public Direction enemySpawnZoneDirection() {
+        return allySpawnZoneDirection().opposite();
+    }
+
     public boolean moveToward(MapLocation location) throws GameActionException {
         Direction direction = rc.getLocation().directionTo(location);
         return moveToward(direction);
     }
+
 
     public boolean moveToward(Direction direction) throws GameActionException {
         boolean didMove = false;
@@ -83,31 +126,139 @@ public class Duck {
         return didMove;
     }
 
-    public static Direction randomDirection() {
-        int no_directions = Direction.allDirections().length;
-        int ranindx = Math.abs(RobotPlayer.rng.nextInt()) % no_directions;
-        return Direction.allDirections()[ranindx];
+
+//    public boolean lookForFlag() throws GameActionException {
+//        boolean pickedUpFlag = false;
+//        FlagInfo[] flags = rc.senseNearbyFlags(-1, rc.getTeam());
+//        for (FlagInfo flag : flags) {
+//            if (rc.canPickupFlag(flag.getLocation())) {
+//                pickedUpFlag = true;
+//                rc.pickupFlag(flag.getLocation());
+//                break;
+//
+//                public TrapType getRandomTrapType () {
+//                    TrapType[] trapTypes = {TrapType.EXPLOSIVE, TrapType.WATER, TrapType.STUN};
+//                    return trapTypes[rng.nextInt(trapTypes.length)];
+//                }
+//            }
+//        }
+//    }
+
+    public boolean hasCooldown() {
+        return cooldown > 0;
     }
 
-    public void moveInRandomDirection() throws GameActionException {
-        boolean didMove = false;
-        while (!didMove) {
-            Direction otherDirection = randomDirection();
-            didMove = moveToward(otherDirection);
+    public void applyCooldown(int amount) {
+        cooldown += amount;
+    }
+
+    public void reduceCooldown() {
+        if (cooldown > 0) {
+            cooldown--;
         }
     }
 
-    public Direction allySpawnZoneDirection() {
-        return rc.getLocation().directionTo(rc.getAllySpawnLocations()[0]);
+    public void collectCrumbs() throws GameActionException {
+        MapLocation[] crumbLocations = rc.senseNearbyCrumbs(GameConstants.VISION_RADIUS_SQUARED);
+        if (crumbLocations.length > 0) {
+            moveToward(crumbLocations[0]);
+        } else {
+            moveInRandomDirection();
+        }
     }
 
-    public Direction enemySpawnZoneDirection() {
-        return allySpawnZoneDirection().opposite();
+    public void placeTrap(TrapType trapType, MapLocation location) throws GameActionException {
+        if (trapType == TrapType.EXPLOSIVE && rc.canBuild(TrapType.EXPLOSIVE, location) && !hasCooldown()) {
+            rc.build(TrapType.EXPLOSIVE, location);
+            applyCooldown(GameConstants.FILL_COOLDOWN);
+        } else if (trapType == TrapType.STUN && rc.canBuild(TrapType.STUN, location) && !hasCooldown()) {
+            rc.build(TrapType.STUN, location);
+            applyCooldown(GameConstants.FILL_COOLDOWN);
+        } else if (trapType == TrapType.WATER && rc.canFill(location) && !hasCooldown()) {
+            rc.fill(location);
+            applyCooldown(GameConstants.FILL_COOLDOWN);
+        } else if (trapType == TrapType.NONE && rc.canDig(location) && !hasCooldown()) {
+            rc.dig(location);
+            applyCooldown(GameConstants.DIG_COOLDOWN);
+        }
     }
 
-    public void pickupFlag() throws GameActionException {
-        if (rc.canPickupFlag(rc.getLocation())) {
-            rc.pickupFlag(rc.getLocation());
+//    public void lookForFlag() throws GameActionException {
+//        FlagInfo[] flags = rc.senseNearbyFlags(-1, rc.getTeam());
+//        for (FlagInfo flag : flags) {
+//            if (rc.canPickupFlag(flag.getLocation())) {
+//                rc.pickupFlag(flag.getLocation());
+//                break;
+//            }
+//        }
+//    }
+
+
+//    public void lookForFlag() throws GameActionException {
+//        if (rc.hasFlag()) {
+//            // Reset flag timer if the Duck is holding a flag
+//            flagTimer = 0;
+//            // Check for nearby enemies
+//            RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(GameConstants.ATTACK_RADIUS_SQUARED, rc.getTeam().opponent());
+//
+//            // Drop the flag as a signal if enemies are close and dropping is allowed
+//            if (nearbyEnemies.length > 0 && rc.canDropFlag(rc.getLocation())) {
+//                rc.dropFlag(rc.getLocation());
+//                applyCooldown(GameConstants.PICKUP_DROP_COOLDOWN);
+//            }
+//        } else {
+//            // Increment flag timer when the Duck is not holding a flag
+//            flagTimer++;
+//            // Attempt to pick up a flag if the timer exceeds the threshold
+//            if (flagTimer >= FLAG_DROP_TIME) {
+//                // Sense flags for the team within unlimited range
+//                FlagInfo[] flags = rc.senseNearbyFlags(-1, rc.getTeam());
+//                FlagInfo closestFlag = null;
+//                int closestDistance = Integer.MAX_VALUE;
+//                // Find the nearest flag that can be picked up
+//                for (FlagInfo flag : flags) {
+//                    int distance = rc.getLocation().distanceSquaredTo(flag.getLocation());
+//                    if (distance < closestDistance && rc.canPickupFlag(flag.getLocation()) && !hasCooldown()) {
+//                        closestFlag = flag;
+//                        closestDistance = distance;
+//                    }
+//                }
+//
+//                // Pick up the nearest flag if available
+//                if (closestFlag != null) {
+//                    rc.pickupFlag(closestFlag.getLocation());
+//                    //broadcastFlagLocation(closestFlag.getLocation());
+//                    applyCooldown(GameConstants.PICKUP_DROP_COOLDOWN);
+//                }
+//                // Reset the flag timer after attempting to pick up a flag
+//                flagTimer = 0;
+//            }
+//        }
+//        return pickedUpFlag;
+//    }
+
+
+    private Direction[] getPrioritizedDirections(Direction primaryDirection) {
+        switch (primaryDirection) {
+            case NORTH:
+                return new Direction[]{Direction.NORTH, Direction.NORTHWEST, Direction.NORTHEAST, Direction.WEST, Direction.EAST};
+            case SOUTH:
+                return new Direction[]{Direction.SOUTH, Direction.SOUTHWEST, Direction.SOUTHEAST, Direction.WEST, Direction.EAST};
+            case EAST:
+                return new Direction[]{Direction.EAST, Direction.NORTHEAST, Direction.SOUTHEAST, Direction.NORTH, Direction.SOUTH};
+            case WEST:
+                return new Direction[]{Direction.WEST, Direction.NORTHWEST, Direction.SOUTHWEST, Direction.NORTH, Direction.SOUTH};
+            case NORTHEAST:
+                return new Direction[]{Direction.NORTHEAST, Direction.NORTH, Direction.EAST, Direction.NORTHWEST, Direction.SOUTHEAST};
+            case NORTHWEST:
+                return new Direction[]{Direction.NORTHWEST, Direction.NORTH, Direction.WEST, Direction.NORTHEAST, Direction.SOUTHWEST};
+            case SOUTHEAST:
+                return new Direction[]{Direction.SOUTHEAST, Direction.SOUTH, Direction.EAST, Direction.SOUTHWEST, Direction.NORTHEAST};
+            case SOUTHWEST:
+                return new Direction[]{Direction.SOUTHWEST, Direction.SOUTH, Direction.WEST, Direction.SOUTHEAST, Direction.NORTHWEST};
+            default:
+                return new Direction[]{primaryDirection};
         }
     }
 }
+
