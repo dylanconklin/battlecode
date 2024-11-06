@@ -2,27 +2,28 @@ package Team3;
 
 import battlecode.common.*;
 public class HealerDuck extends Duck {
-
-    private static final int MAX_HEALTH_THRESHOLD = 300;
+    //total health is 1000 and healing to be done when life drops below 900.
+    private static final int MAX_HEALTH_THRESHOLD = 900;
 
     public HealerDuck(RobotController rc) {
         super(rc);
         skill = SkillType.HEAL;
     }
 
-    // this method will return true / false based on the fact if it is healing or not. this return can be utilized
+
     // to take a move action upon not healing.
 
     public int exploreAround() throws GameActionException {
         MapLocation[] closeByCrumbs = rc.senseNearbyCrumbs(-1);
+        int found_crumbs = 0 ;
         if (closeByCrumbs != null && closeByCrumbs.length > 0) {
-            while (closeByCrumbs.length > 0) {
-            moveToward(Direction.allDirections()[0]);
-            closeByCrumbs = rc.senseNearbyCrumbs(-1);
-            return 1;
-        }
-        }else{
-            return 0;
+            while (closeByCrumbs.length > 0)
+            {
+                moveToward(Direction.allDirections()[0]);
+                closeByCrumbs = rc.senseNearbyCrumbs(-1);
+                found_crumbs++;
+            }
+            return found_crumbs;
         }
     return 0;
     }
@@ -30,13 +31,19 @@ public class HealerDuck extends Duck {
     @Override
     public void play() throws GameActionException {
         super.setupPlay();
+        MapLocation ml = rc.getLocation();
+        if (ml == null)
+        {
+            // there was an issue with getting null location need to debug.
+            System.out.println("DBG: H: ml is null");
+        }
         if (!heal()) {  // Try to heal first, and only proceed if no healing was done
             lookForFlag();
             exploreAround();
             move();
         }
     }
-
+    // this method will return true / false based on the fact if it is healing or not. this return can be utilized
     public boolean heal() throws GameActionException {
         // heal () should be called from move method.
         // sensing all the robots near in its vision to heal. it will heal only the ally robots.
