@@ -27,9 +27,12 @@ public class HealerDuck extends Duck {
 
     @Override
     public void play() throws GameActionException {
+        super.setupPlay();
         MapLocation ml = rc.getLocation();
-        if (ml == null)
-        {
+        if (ml == null) {
+            if (!rc.isSpawned()) {
+                System.out.println("rc is not spawned");
+            }
             // need to debug the issue with move why the location is null sometime. 
             System.out.println("DBG: H: ml is null");
             return;
@@ -102,6 +105,5 @@ public class HealerDuck extends Duck {
         } else {
             moveInRandomDirection();
         }
-
     }
 }
