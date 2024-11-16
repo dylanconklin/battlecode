@@ -29,15 +29,6 @@ public class HealerDuck extends Duck {
     public void play() throws GameActionException {
         super.setupPlay();
         MapLocation ml = rc.getLocation();
-        if (ml == null) {
-            if (!rc.isSpawned()) {
-                System.out.println("rc is not spawned");
-            }
-            // need to debug the issue with move why the location is null sometime. 
-            System.out.println("DBG: H: ml is null");
-            return;
-        }
-
         if (!heal_ally()) {  // Try to heal first, and only proceed if no healing was done
             lookForFlag();
             exploreAround();
