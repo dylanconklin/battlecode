@@ -1,6 +1,10 @@
 package Team3;
 
 import battlecode.common.*;
+
+import java.util.Arrays;
+import java.util.Comparator;
+
 public class HealerDuck extends Duck {
 
     //total health is 1000 and healing to be done when life drops below 900.
