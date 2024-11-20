@@ -13,6 +13,9 @@ public class AttackerDuck extends Duck {
     @Override
     public void play() throws GameActionException {
         super.setupPlay();
+        if (rc.canBuyGlobal(GlobalUpgrade.ATTACK)) {
+            rc.buyGlobal(GlobalUpgrade.ATTACK);
+        }
         attack();
         lookForFlag();
         move();

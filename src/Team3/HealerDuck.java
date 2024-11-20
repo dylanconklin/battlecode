@@ -34,6 +34,9 @@ public class HealerDuck extends Duck {
     public void play() throws GameActionException {
         super.setupPlay();
         MapLocation ml = rc.getLocation();
+        if (rc.canBuyGlobal(GlobalUpgrade.HEALING)) {
+            rc.buyGlobal(GlobalUpgrade.HEALING);
+        }
         if (!heal_ally()) {  // Try to heal first, and only proceed if no healing was done
             lookForFlag();
             exploreAround();
@@ -108,13 +111,7 @@ public class HealerDuck extends Duck {
                 rc.move(bestDirection);
             }
             if (rc.canHeal(bestTarget.location)) {
-                int a_heal_lvl = bestTarget.getHealth();
                 rc.heal(bestTarget.location);
-                RobotInfo updatedAlly = rc.senseRobotAtLocation(bestTarget.location);
-                if (updatedAlly != null) {
-                    System.out.println("Updated health after healing: " + updatedAlly.getHealth());
-                }
-                System.out.println("healing from: "+a_heal_lvl +" : "+bestTarget.getHealth());
                 didHeal = true;
             }
         }

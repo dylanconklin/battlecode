@@ -16,6 +16,9 @@ public class BuilderDuck extends Duck {
     @Override
     public void play() throws GameActionException {
         super.setupPlay();
+        if (rc.canBuyGlobal(GlobalUpgrade.CAPTURING)) {
+            rc.buyGlobal(GlobalUpgrade.CAPTURING);
+        }
 
         lookForFlag();
 
