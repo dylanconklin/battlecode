@@ -43,7 +43,7 @@ public class HealerDuckTest {
     }
     @Test
     void testHeal() throws GameActionException {
-        boolean a= healerDuck.heal();
+        boolean a= healerDuck.heal_ally();
         RobotController mockedRc = Mockito.mock(RobotController.class);
         assertFalse(a);
     }

@@ -119,9 +119,12 @@ public class Duck {
         if (rc.canFill(rc.getLocation().add(direction))) {
             rc.fill(rc.getLocation().add(direction));
         }
-        if (rc.canMove(direction)) {
-            didMove = true;
-            rc.move(direction);
+        for(Direction prioritizedDirection : getPrioritizedDirections(direction)) {
+            if (rc.canMove(prioritizedDirection)) {
+                rc.move(prioritizedDirection);
+                didMove = true;
+                break;
+            }
         }
         return didMove;
     }
@@ -237,28 +240,29 @@ public class Duck {
 //        return pickedUpFlag;
 //    }
 
+    static ArrayList<Direction> directions() {
+        ArrayList<Direction> directions = new ArrayList<>(Arrays.asList(Direction.values()));
+        directions.remove(Direction.CENTER);
+        return directions;
+    }
 
-    private Direction[] getPrioritizedDirections(Direction primaryDirection) {
-        switch (primaryDirection) {
-            case NORTH:
-                return new Direction[]{Direction.NORTH, Direction.NORTHWEST, Direction.NORTHEAST, Direction.WEST, Direction.EAST};
-            case SOUTH:
-                return new Direction[]{Direction.SOUTH, Direction.SOUTHWEST, Direction.SOUTHEAST, Direction.WEST, Direction.EAST};
-            case EAST:
-                return new Direction[]{Direction.EAST, Direction.NORTHEAST, Direction.SOUTHEAST, Direction.NORTH, Direction.SOUTH};
-            case WEST:
-                return new Direction[]{Direction.WEST, Direction.NORTHWEST, Direction.SOUTHWEST, Direction.NORTH, Direction.SOUTH};
-            case NORTHEAST:
-                return new Direction[]{Direction.NORTHEAST, Direction.NORTH, Direction.EAST, Direction.NORTHWEST, Direction.SOUTHEAST};
-            case NORTHWEST:
-                return new Direction[]{Direction.NORTHWEST, Direction.NORTH, Direction.WEST, Direction.NORTHEAST, Direction.SOUTHWEST};
-            case SOUTHEAST:
-                return new Direction[]{Direction.SOUTHEAST, Direction.SOUTH, Direction.EAST, Direction.SOUTHWEST, Direction.NORTHEAST};
-            case SOUTHWEST:
-                return new Direction[]{Direction.SOUTHWEST, Direction.SOUTH, Direction.WEST, Direction.SOUTHEAST, Direction.NORTHWEST};
-            default:
-                return new Direction[]{primaryDirection};
+    // This returns an array of all possible directions in order of priority based on the seed direction(primaryDirection)
+    private ArrayList<Direction> getPrioritizedDirections(Direction primaryDirection) throws GameActionException {
+        ArrayList<Direction> result = new ArrayList<>();
+        ArrayList<Direction> directions = directions();
+        int direction = directions.indexOf(primaryDirection);
+        int moveCounter = 0;
+        result.add(primaryDirection);
+        while (moveCounter * 2 < directions.size()) {
+            // Randomize whether we're going left or right, then add both directions
+            direction *= rng.nextBoolean() ? 1 : -1;
+            result.add(directions.get(direction < 0 ? direction + directions.size() : direction % directions.size()));
+            direction *= -1;
+            result.add(directions.get(direction < 0 ? direction + directions.size() : direction % directions.size()));
+            moveCounter++;
         }
+        result.add(primaryDirection.opposite());
+        result.add(Direction.CENTER);
+        return result;
     }
 }
-

@@ -2,9 +2,16 @@ package Team3;
 
 import battlecode.common.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+
 public class AttackerDuck extends Duck {
     public AttackerDuck(RobotController rc) {
         super(rc);
+
+
         skill = SkillType.ATTACK;
     }
 
@@ -14,34 +21,30 @@ public class AttackerDuck extends Duck {
         attack();
         lookForFlag();
         move();
-
     }
 
     public int attack() throws GameActionException {
         RobotInfo[] robotInfos = rc.senseNearbyRobots();
-        if (robotInfos != null) {
-            //  Team rcTeam = rc.getTeam();
-            for (RobotInfo robot : robotInfos) {
-                if (rc.canAttack(robot.location)) {
-                    rc.attack(robot.location);
-                }
+        for (RobotInfo robot : robotInfos) {
+            if (rc.canAttack(robot.location)) {
+                rc.attack(robot.location);
             }
-            return robotInfos.length;
-        } else
-            return 0;
+        }
+        return robotInfos.length;
     }
 
     public int move() throws GameActionException {
-        if (rc.getRoundNum() >= GameConstants.SETUP_ROUNDS && (rc.hasFlag() || rc.getHealAmount() <= 300)) {
+        RobotInfo[] enemies = Arrays.stream(rc.senseNearbyRobots()).filter(robot -> robot.getTeam() != rc.getTeam()).sorted(Comparator.comparing(r -> r.getHealth())).toArray(RobotInfo[]::new);
+        if (enemies.length > 0 && rc.getHealth() >= 300) {
+            moveToward(enemies[0].location);
+        } else if (rc.hasFlag() || rc.getHealAmount() < 300) {
             // move toward ally spawn locations
             // TODO: don't move blindly toward locations[0]
             moveToward(allySpawnZoneDirection());
-        } else if (rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
-            // move toward adversary spawn locations
-            // TODO: don't move blindly away from locations[0]
-            moveToward(enemySpawnZoneDirection());
-        } else {
+        } else if (rc.getRoundNum() <= GameConstants.SETUP_ROUNDS) {
             moveInRandomDirection();
+        } else {
+            moveToward(enemySpawnZoneDirection());
         }
         return 1;
     }
