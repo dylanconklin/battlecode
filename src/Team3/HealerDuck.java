@@ -1,6 +1,10 @@
 package Team3;
 
 import battlecode.common.*;
+
+import java.util.Arrays;
+import java.util.Comparator;
+
 public class HealerDuck extends Duck {
 
     //total health is 1000 and healing to be done when life drops below 900.
@@ -121,13 +125,13 @@ public class HealerDuck extends Duck {
     }
 
     public void move() throws GameActionException {
-
-        if (rc.getRoundNum() <= GameConstants.SETUP_ROUNDS ){
-            moveToward(enemySpawnZoneDirection());
-        }
-        else if (rc.hasFlag()) {
+        RobotInfo[] ducksToHeal = Arrays.stream(rc.senseNearbyRobots()).filter(robot -> robot.getTeam() == rc.getTeam() && robot.getHealth() <= 300).sorted(Comparator.comparing(r -> r.getHealth())).toArray(RobotInfo[]::new);
+        if (ducksToHeal.length > 0) {
+            moveToward(ducksToHeal[0].getLocation());
+        } else if (rc.hasFlag()) {
             moveToward(allySpawnZoneDirection());
-
+        } else if (rc.getRoundNum() <= GameConstants.SETUP_ROUNDS) {
+            moveToward(enemySpawnZoneDirection());
         } else {
             moveInRandomDirection();
         }
