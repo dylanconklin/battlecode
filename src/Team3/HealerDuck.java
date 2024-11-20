@@ -16,7 +16,7 @@ public class HealerDuck extends Duck {
     public HealerDuck(RobotController rc) {
         super(rc);
         myTeam = rc.getTeam();
-        opTeam = rc.getTeam().opponent();
+        //opTeam = rc.getTeam().opponent();
         skill = SkillType.HEAL;
         //System.out.println("DBG: HealerDuck");
     }
@@ -26,6 +26,8 @@ public class HealerDuck extends Duck {
     public int exploreAround() throws GameActionException {
         int found_crumbs = 0 ;
         MapLocation[] closeByCrumbs = rc.senseNearbyCrumbs(GameConstants.VISION_RADIUS_SQUARED);
+        if (closeByCrumbs ==null)
+            return 0;
         while (closeByCrumbs.length > 0) {
             moveToward(closeByCrumbs[0]);
             closeByCrumbs = rc.senseNearbyCrumbs(GameConstants.VISION_RADIUS_SQUARED);
@@ -48,12 +50,12 @@ public class HealerDuck extends Duck {
         }
 
     }
-    private RobotInfo healTarget(MapLocation c,int r) throws GameActionException {
+    public RobotInfo healTarget(MapLocation c,int r) throws GameActionException {
         RobotInfo target = null;
         int minHealth = Integer.MAX_VALUE;
         int maxPriority = Integer.MIN_VALUE;
 
-        RobotInfo[] robots = rc.senseNearbyRobots(c, r, myTeam);
+        RobotInfo[] robots = rc.senseNearbyRobots(c, r, rc.getTeam());
         for (int i = robots.length; --i >= 0; ) {
             RobotInfo robot = robots[i];
             if (robot.health == GameConstants.DEFAULT_HEALTH) {
@@ -91,14 +93,11 @@ public class HealerDuck extends Duck {
             if (direction != Direction.CENTER && !rc.canMove(direction)) {
                 continue;
             }
-
             MapLocation newLocation = rc.adjacentLocation(direction);
             RobotInfo newTarget = healTarget(newLocation, GameConstants.HEAL_RADIUS_SQUARED);
             if (newTarget == null) {
                 continue;
             }
-
-
             int score = newTarget.attackLevel + newTarget.healLevel + newTarget.buildLevel;
             if (newTarget.hasFlag) {
                 score += 1000;
@@ -119,8 +118,6 @@ public class HealerDuck extends Duck {
                 didHeal = true;
             }
         }
-
-
         return didHeal;
     }
 

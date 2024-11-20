@@ -14,6 +14,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 class BuilderDuckTest {
+    private enum State { SETUP, DEFENDING, EXPLORING }
     private BuilderDuck builderDuck;
     private RobotController rc;
 
@@ -45,4 +46,41 @@ class BuilderDuckTest {
         int result = builderDuck.gatherResources();
         assertEquals(1, result);
     }
+    @Test
+    public void testPlaceTrap() throws GameActionException {
+        MapLocation trapLocation = new MapLocation(0, 1);
+        when(rc.canBuild(TrapType.EXPLOSIVE, trapLocation)).thenReturn(true);
+        when(rc.getCrumbs()).thenReturn(100);
+        builderDuck.placeTrap(TrapType.EXPLOSIVE, trapLocation);
+        verify(rc, times(1)).build(TrapType.EXPLOSIVE, trapLocation);
+    } @Test
+    public void testPlaceTrap1() throws GameActionException {
+        MapLocation trapLocation = new MapLocation(0, 1);
+        when(rc.canBuild(TrapType.EXPLOSIVE, trapLocation)).thenReturn(true);
+        when(rc.getCrumbs()).thenReturn(100);
+        builderDuck.placeTrap(TrapType.EXPLOSIVE, trapLocation);
+        verify(rc, times(1)).build(TrapType.EXPLOSIVE, trapLocation);
+    }
+    @Test
+    public void testGuardFlag() throws GameActionException {
+        when(rc.getTeam()).thenReturn(Team.A);
+        when(rc.senseNearbyRobots(BuilderDuck.SENSING_RADIUS, rc.getTeam().opponent())).thenReturn(new RobotInfo[]{}); // No enemies detected
+        builderDuck.guardFlag();
+        assertEquals(BuilderDuck.State.SETUP, builderDuck.state);
+        RobotInfo enemy1 = mock(RobotInfo.class);
+        when(enemy1.getTeam()).thenReturn(Team.B);
+        RobotInfo[] enemies = new RobotInfo[]{enemy1};
+        when(rc.senseNearbyRobots(BuilderDuck.SENSING_RADIUS, rc.getTeam().opponent())).thenReturn(enemies); // 1 enemy detected
+        builderDuck.guardFlag();
+        assertEquals(BuilderDuck.State.SETUP, builderDuck.state);
+        RobotInfo enemy2 = mock(RobotInfo.class);
+        RobotInfo enemy3 = mock(RobotInfo.class);
+        RobotInfo enemy4 = mock(RobotInfo.class);
+        RobotInfo[] multipleEnemies = new RobotInfo[]{enemy1, enemy2, enemy3, enemy4};
+        when(rc.senseNearbyRobots(BuilderDuck.SENSING_RADIUS, rc.getTeam().opponent())).thenReturn(multipleEnemies); // 4 enemies detected
+        builderDuck.guardFlag();
+        assertEquals(BuilderDuck.State.EXPLORING, builderDuck.state);
+    }
+
+
 }

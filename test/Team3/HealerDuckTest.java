@@ -22,29 +22,54 @@ public class HealerDuckTest {
     public void setUp() throws GameActionException {
         rc = mock(RobotController.class);
         healerDuck = new HealerDuck(rc);
+        when(rc.getTeam()).thenReturn(Team.A); // Set the team to A
+        when(rc.getLocation()).thenReturn(new MapLocation(0, 0));
     }
-
-
     @Test
     void testHealerExploreAround() throws GameActionException {
-        // Create an array of MapLocation with a size of 3
-        MapLocation[] locations = new MapLocation[3];
-        locations[0] = new MapLocation(1, 1);
-        locations[1] = new MapLocation(2, 2);
-        locations[2] = new MapLocation(3, 3);
-        Direction dir = RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
-        //when(rc.getTeam()).thenReturn(Team.valueOf("Team"));
-        when(rc.senseNearbyCrumbs(-1)).thenReturn(locations);
-        when(rc.getLocation()).thenReturn(locations[0]);
-        when(healerDuck.moveToward(dir)).thenReturn(true);
-        when(rc.canFill(locations[0])).thenReturn(true);
-        int a = healerDuck.exploreAround();
-        assertEquals(1, a);
+        MapLocation[] locations = {
+                new MapLocation(1, 1),
+                new MapLocation(2, 2),
+                new MapLocation(3, 3)
+        };
+        when(rc.senseNearbyCrumbs(GameConstants.VISION_RADIUS_SQUARED)).thenReturn(locations, new MapLocation[0]);
+        when(rc.canMove(any(Direction.class))).thenReturn(true);
+        doNothing().when(rc).move(any(Direction.class));
+        int foundCrumbs = healerDuck.exploreAround();
+        assertEquals(1, foundCrumbs);
+        verify(rc, times(1)).move(any(Direction.class));
+    }
+
+    @Test
+    void testHealerMoveToward() throws GameActionException {
+        MapLocation target = new MapLocation(5, 5);
+        when(rc.canMove(any(Direction.class))).thenReturn(true);
+        doNothing().when(rc).move(any(Direction.class));
+        healerDuck.moveToward(target);
+        verify(rc, atLeastOnce()).move(any(Direction.class));
     }
     @Test
-    void testHeal() throws GameActionException {
-        boolean a= healerDuck.heal_ally();
-        RobotController mockedRc = Mockito.mock(RobotController.class);
-        assertFalse(a);
+    void testHealNoAction() throws GameActionException {
+        when(rc.isActionReady()).thenReturn(false);
+        when(rc.senseNearbyRobots(GameConstants.VISION_RADIUS_SQUARED, Team.B)).thenReturn(new RobotInfo[0]);
+        boolean didHeal = healerDuck.heal_ally();
+        assertFalse(didHeal);
+        verify(rc, never()).heal(any(MapLocation.class));
     }
+    @Test
+    void testHealTarget() throws GameActionException {
+        MapLocation center = new MapLocation(0, 0);
+        RobotInfo[] robots = {
+                new RobotInfo(1, Team.A, 70, new MapLocation(1, 12), false, 1, 1, 1),
+                new RobotInfo(2, Team.B, 100, new MapLocation(1, 123), false, 1, 1, 1)
+        };
+        when(rc.senseNearbyRobots(center, GameConstants.VISION_RADIUS_SQUARED, Team.A)).thenReturn(robots);
+        RobotInfo target = healerDuck.healTarget(center, GameConstants.VISION_RADIUS_SQUARED);
+        assertNotNull(target);
+        assertEquals(robots[0], target);
+        when(rc.senseNearbyRobots(center, GameConstants.VISION_RADIUS_SQUARED, Team.A)).thenReturn(new RobotInfo[0]);
+        target = healerDuck.healTarget(center, GameConstants.VISION_RADIUS_SQUARED);
+        assertNull(target);
+    }
+
 }

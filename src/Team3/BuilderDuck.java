@@ -3,10 +3,10 @@ package Team3;
 import battlecode.common.*;
 
 public class BuilderDuck extends Duck {
-    private enum State { SETUP, DEFENDING, EXPLORING }
-    private State state = State.SETUP;
-    private int trapCooldown = 0;
-    private static final int SENSING_RADIUS = 10; // Adjust based on game settings
+    public enum State { SETUP, DEFENDING, EXPLORING }
+    public State state = State.SETUP;
+    public int trapCooldown = 0;
+    public static final int SENSING_RADIUS = 10; // Adjust based on game settings
 
     public BuilderDuck(RobotController rc) {
         super(rc);
@@ -45,7 +45,7 @@ public class BuilderDuck extends Duck {
         reduceCooldown();
     }
 
-    private void setupDefensivePerimeter() throws GameActionException {
+    public void setupDefensivePerimeter() throws GameActionException {
         MapLocation allyFlagLocation = rc.getLocation().add(allySpawnZoneDirection());
 
         for (Direction dir : Direction.allDirections()) {
@@ -64,7 +64,7 @@ public class BuilderDuck extends Duck {
         }
     }
 
-    private void guardFlag() throws GameActionException {
+    public void guardFlag() throws GameActionException {
         MapLocation flagLocation = rc.getLocation(); // Assuming the flag location is the robot's current location
 
         // Check for nearby enemies and adjust state based on threat level
@@ -77,7 +77,7 @@ public class BuilderDuck extends Duck {
         }
     }
 
-    private void adaptiveTrapPlacement() throws GameActionException {
+    public void adaptiveTrapPlacement() throws GameActionException {
         RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(GameConstants.VISION_RADIUS_SQUARED, rc.getTeam().opponent());
 
         if (nearbyEnemies.length > 0) {
