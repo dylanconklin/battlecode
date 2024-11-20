@@ -6,8 +6,13 @@ public class HealerDuck extends Duck {
     //total health is 1000 and healing to be done when life drops below 900.
     private static final int MAX_HEALTH_THRESHOLD = 900;
 
+    private Team myTeam = null;
+    private Team opTeam = null;
+
     public HealerDuck(RobotController rc) {
         super(rc);
+        myTeam = rc.getTeam();
+        opTeam = rc.getTeam().opponent();
         skill = SkillType.HEAL;
         System.out.println("DBG: HealerDuck");
     }
@@ -36,56 +41,83 @@ public class HealerDuck extends Duck {
         }
 
     }
+    private RobotInfo healTarget(MapLocation c,int r) throws GameActionException {
+        RobotInfo target = null;
+        int minHealth = Integer.MAX_VALUE;
+        int maxPriority = Integer.MIN_VALUE;
+
+        RobotInfo[] robots = rc.senseNearbyRobots(c, r, myTeam);
+        for (int i = robots.length; --i >= 0; ) {
+            RobotInfo robot = robots[i];
+            if (robot.health == GameConstants.DEFAULT_HEALTH) {
+                continue;
+            }
+
+            int priority = robot.attackLevel + robot.healLevel + robot.buildLevel;
+            if (robot.hasFlag) {
+                priority += 1000;
+            }
+
+            if (target == null || priority > maxPriority || (priority == maxPriority && robot.health < minHealth)) {
+                target = robot;
+                minHealth = robot.health;
+                maxPriority = priority;
+            }
+        }
+        return target;
+    }
 
     public boolean heal_ally() throws GameActionException {
         // heal () is only done if no opponent in vision_radius.
         if (!rc.isActionReady() || rc.senseNearbyRobots(GameConstants.VISION_RADIUS_SQUARED,rc.getTeam().opponent() ).length > 0) {
             return false;
         }
-        // sensing all the robots near in its vision to heal. it will heal only the ally robots.
-
-        Team t = rc.getTeam();
-        MapLocation ml = rc.getLocation();
-        RobotInfo[] nearbyAllies = rc.senseNearbyRobots(-1, t);
-
-        //System.out.println("DBG: Heal starts" +nearbyAllies.length);
         boolean didHeal = false;
-        if (nearbyAllies != null)
-        {
-            for (RobotInfo ally : nearbyAllies) {
-                int b_heal_lvl = ally.getHealLevel();
-                int b_health_lvl = ally.getHealth();
-                if(ally.getHealLevel() >0 ||ally.getHealth()< 1000) {
-                   // System.out.println("DBG: Heal stats" + ally.getHealLevel() + "health: " + ally.getHealth());
-                }
+        int maxScore = Integer.MIN_VALUE;
+        // sensing all the robots near in its vision to heal. it will heal only the ally robots.
+        Direction bestDirection = null;
+        RobotInfo bestTarget = null;
+        MapLocation ml = rc.getLocation();
+        Direction[] allDirections = Direction.values();
+        for (int i = allDirections.length; --i >= 0; ) {
+            Direction direction = allDirections[i];
+            if (direction != Direction.CENTER && !rc.canMove(direction)) {
+                continue;
+            }
 
-                // healing should be enabled when health is less than 1000.
-                if (ally.getHealth() < MAX_HEALTH_THRESHOLD) {
-
-                    // Heal the ally if it's within healing range
-
-                    if (rc.canHeal(ally.location)) {
-
-                        rc.heal(ally.location);
-
-                        // add experience while healing.
-                        rc.getExperience(skill);
+            MapLocation newLocation = rc.adjacentLocation(direction);
+            RobotInfo newTarget = healTarget(newLocation, GameConstants.HEAL_RADIUS_SQUARED);
+            if (newTarget == null) {
+                continue;
+            }
 
 
-                        didHeal = true;
-                        System.out.println("DBG: Healing");
-                        int a_heal_lvl = ally.getHealLevel();
-                        int a_health_lvl = ally.getHealth();
-                        if(a_health_lvl!= b_health_lvl) {
-                            System.out.println("DBG: Heal stats after" + ally.getHealLevel() + "health: " + ally.getHealth());
-                        }
+            int score = newTarget.attackLevel + newTarget.healLevel + newTarget.buildLevel;
+            if (newTarget.hasFlag) {
+                score += 1000;
+            }
 
-                        //break;
-                    }
-                }
-
+            if (score > maxScore) {
+                bestDirection = direction;
+                bestTarget = newTarget;
+                maxScore = score;
             }
         }
+        if (bestDirection != null) {
+            if (bestDirection != Direction.CENTER) {
+                System.out.println("heal move " + bestDirection);
+                rc.move(bestDirection);
+            }
+
+            if (rc.canHeal(bestTarget.location)) {
+                int a_heal_lvl = bestTarget.getHealth();
+                rc.heal(bestTarget.location);
+                System.out.println("healing from: "+a_heal_lvl +" : "+bestTarget.getHealth());
+                rc.getExperience(skill);
+                didHeal = true;
+            }
+        }
+
 
         return didHeal;
     }
