@@ -9,7 +9,7 @@ public class HealerDuck extends Duck {
     public HealerDuck(RobotController rc) {
         super(rc);
         skill = SkillType.HEAL;
-
+        System.out.println("DBG: HealerDuck");
     }
 
     // this method will return true / false based on the fact if it is healing or not. this return can be utilized
@@ -38,8 +38,10 @@ public class HealerDuck extends Duck {
     }
 
     public boolean heal_ally() throws GameActionException {
-        // heal () should be called from move method.
-
+        // heal () is only done if no opponent in vision_radius.
+        if (!rc.isActionReady() || rc.senseNearbyRobots(GameConstants.VISION_RADIUS_SQUARED,rc.getTeam().opponent() ).length > 0) {
+            return false;
+        }
         // sensing all the robots near in its vision to heal. it will heal only the ally robots.
 
         Team t = rc.getTeam();
@@ -69,7 +71,9 @@ public class HealerDuck extends Duck {
                         // add experience while healing.
                         rc.getExperience(skill);
 
+
                         didHeal = true;
+                        System.out.println("DBG: Healing");
                         int a_heal_lvl = ally.getHealLevel();
                         int a_health_lvl = ally.getHealth();
                         if(a_health_lvl!= b_health_lvl) {
@@ -93,6 +97,7 @@ public class HealerDuck extends Duck {
         }
         else if (rc.hasFlag()) {
             moveToward(allySpawnZoneDirection());
+
         } else {
             moveInRandomDirection();
         }
