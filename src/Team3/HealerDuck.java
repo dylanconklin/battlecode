@@ -50,12 +50,12 @@ public class HealerDuck extends Duck {
         }
 
     }
-    private RobotInfo healTarget(MapLocation c,int r) throws GameActionException {
+    public RobotInfo healTarget(MapLocation c,int r) throws GameActionException {
         RobotInfo target = null;
         int minHealth = Integer.MAX_VALUE;
         int maxPriority = Integer.MIN_VALUE;
 
-        RobotInfo[] robots = rc.senseNearbyRobots(c, r, myTeam);
+        RobotInfo[] robots = rc.senseNearbyRobots(c, r, rc.getTeam());
         for (int i = robots.length; --i >= 0; ) {
             RobotInfo robot = robots[i];
             if (robot.health == GameConstants.DEFAULT_HEALTH) {

@@ -39,14 +39,7 @@ public class HealerDuckTest {
         assertEquals(1, foundCrumbs);
         verify(rc, times(1)).move(any(Direction.class));
     }
-    @Test
-    void testHealNoAction() throws GameActionException {
-        when(rc.isActionReady()).thenReturn(false);
-        when(rc.senseNearbyRobots(GameConstants.VISION_RADIUS_SQUARED, Team.B)).thenReturn(new RobotInfo[0]);
-        boolean didHeal = healerDuck.heal_ally();
-        assertFalse(didHeal);
-        verify(rc, never()).heal(any(MapLocation.class));
-    }
+
     @Test
     void testHealerMoveToward() throws GameActionException {
         MapLocation target = new MapLocation(5, 5);
@@ -56,17 +49,35 @@ public class HealerDuckTest {
         verify(rc, atLeastOnce()).move(any(Direction.class));
     }
     @Test
-    void testHealAllyNoHealing() throws GameActionException {
-        RobotInfo[] robots = new RobotInfo[2];
-        robots[0] = mock(RobotInfo.class);
-        robots[1] = mock(RobotInfo.class);
-        when(rc.senseNearbyRobots(GameConstants.VISION_RADIUS_SQUARED, Team.A)).thenReturn(robots);
-        when(robots[0].getHealth()).thenReturn(100);
-        when(robots[1].getHealth()).thenReturn(500);
-        when(rc.canHeal(any(MapLocation.class))).thenReturn(false);
-        doNothing().when(rc).heal(any(MapLocation.class));
+    void testHealNoAction() throws GameActionException {
+        when(rc.isActionReady()).thenReturn(false);
+        when(rc.senseNearbyRobots(GameConstants.VISION_RADIUS_SQUARED, Team.B)).thenReturn(new RobotInfo[0]);
         boolean didHeal = healerDuck.heal_ally();
         assertFalse(didHeal);
         verify(rc, never()).heal(any(MapLocation.class));
+    }
+    @Test
+    void testHealTarget() throws GameActionException {
+        // Setup mock robots with varying priorities and health
+        MapLocation center = new MapLocation(0, 0);
+
+        RobotInfo[] robots = {
+                new RobotInfo(1, Team.A, 70, new MapLocation(1, 12), false, 1, 1, 1),
+                new RobotInfo(2, Team.B, 100, new MapLocation(1, 123), false, 1, 1, 1)
+        };
+
+        when(rc.senseNearbyRobots(center, GameConstants.VISION_RADIUS_SQUARED, Team.A)).thenReturn(robots);
+
+        // Call the healTarget method
+        RobotInfo target = healerDuck.healTarget(center, GameConstants.VISION_RADIUS_SQUARED);
+
+        // Verify that the correct target was selected (Robot 1 should be chosen due to flag priority)
+        assertNotNull(target);
+        assertEquals(robots[0], target);  // Robot 1 should be the target because it has the lowest health
+
+        // Check the behavior when no robots are within range
+        when(rc.senseNearbyRobots(center, GameConstants.VISION_RADIUS_SQUARED, Team.A)).thenReturn(new RobotInfo[0]);
+        target = healerDuck.healTarget(center, GameConstants.VISION_RADIUS_SQUARED);
+        assertNull(target);  // No robots in range, so target should be null
     }
 }

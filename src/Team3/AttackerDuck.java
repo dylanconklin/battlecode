@@ -10,8 +10,6 @@ import java.util.List;
 public class AttackerDuck extends Duck {
     public AttackerDuck(RobotController rc) {
         super(rc);
-
-
         skill = SkillType.ATTACK;
     }
 

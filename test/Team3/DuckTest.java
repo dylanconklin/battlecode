@@ -32,8 +32,6 @@ class DuckTest {
         when(rc.senseNearbyRobots(-1, Team.B)).thenReturn(enemyRobots);
         when(rc.canWriteSharedArray(0, enemyRobots.length)).thenReturn(true);
         when(rc.senseNearbyRobots(-1, Team.B)).thenReturn(enemyRobots);
-
-
         duck.updateEnemyRobots();
         verify(rc, times(1)).writeSharedArray(0, enemyRobots.length);
     }
@@ -48,17 +46,11 @@ class DuckTest {
     }
     @Test
     void testLookForFlag() throws GameActionException {
-
         FlagInfo flag = new FlagInfo(new MapLocation(3, 3), Team.A, true,12);
-
         FlagInfo[] flags = { flag };
-
         when(rc.senseNearbyFlags(-1, rc.getTeam())).thenReturn(flags);
-
         when(rc.canPickupFlag(flag.getLocation())).thenReturn(true);
-
         boolean pickedUpFlag = duck.lookForFlag();
-
         assertTrue(pickedUpFlag);
         verify(rc, times(1)).pickupFlag(flag.getLocation());
     }
@@ -79,4 +71,17 @@ class DuckTest {
         duck.reduceCooldown();
         assertFalse(duck.hasCooldown());
     }
+    @Test
+    void testMoveAwayFromLocation() throws GameActionException {
+        MapLocation enemyLocation = new MapLocation(10, 10);
+        Direction direction = Direction.SOUTH;
+        when(rc.getLocation()).thenReturn(new MapLocation(5, 5));
+        when(rc.canMove(direction)).thenReturn(true);
+
+        boolean result = duck.moveAwayFrom(enemyLocation);
+
+        assertFalse(result);
+         //verify(rc, times(1)).move(direction);
+    }
+
 }

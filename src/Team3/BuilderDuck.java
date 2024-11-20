@@ -45,7 +45,7 @@ public class BuilderDuck extends Duck {
         reduceCooldown();
     }
 
-    private void setupDefensivePerimeter() throws GameActionException {
+    public void setupDefensivePerimeter() throws GameActionException {
         MapLocation allyFlagLocation = rc.getLocation().add(allySpawnZoneDirection());
 
         for (Direction dir : Direction.allDirections()) {
@@ -64,7 +64,7 @@ public class BuilderDuck extends Duck {
         }
     }
 
-    private void guardFlag() throws GameActionException {
+    public void guardFlag() throws GameActionException {
         MapLocation flagLocation = rc.getLocation(); // Assuming the flag location is the robot's current location
 
         // Check for nearby enemies and adjust state based on threat level
