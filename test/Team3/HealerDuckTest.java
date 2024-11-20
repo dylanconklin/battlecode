@@ -23,10 +23,8 @@ public class HealerDuckTest {
         rc = mock(RobotController.class);
         healerDuck = new HealerDuck(rc);
         when(rc.getTeam()).thenReturn(Team.A); // Set the team to A
-        when(rc.getLocation()).thenReturn(new MapLocation(0, 0)); // Default location
+        when(rc.getLocation()).thenReturn(new MapLocation(0, 0));
     }
-
-
     @Test
     void testHealerExploreAround() throws GameActionException {
         MapLocation[] locations = {
@@ -51,11 +49,24 @@ public class HealerDuckTest {
     }
     @Test
     void testHealerMoveToward() throws GameActionException {
-
         MapLocation target = new MapLocation(5, 5);
         when(rc.canMove(any(Direction.class))).thenReturn(true);
         doNothing().when(rc).move(any(Direction.class));
         healerDuck.moveToward(target);
         verify(rc, atLeastOnce()).move(any(Direction.class));
+    }
+    @Test
+    void testHealAllyNoHealing() throws GameActionException {
+        RobotInfo[] robots = new RobotInfo[2];
+        robots[0] = mock(RobotInfo.class);
+        robots[1] = mock(RobotInfo.class);
+        when(rc.senseNearbyRobots(GameConstants.VISION_RADIUS_SQUARED, Team.A)).thenReturn(robots);
+        when(robots[0].getHealth()).thenReturn(100);
+        when(robots[1].getHealth()).thenReturn(500);
+        when(rc.canHeal(any(MapLocation.class))).thenReturn(false);
+        doNothing().when(rc).heal(any(MapLocation.class));
+        boolean didHeal = healerDuck.heal_ally();
+        assertFalse(didHeal);
+        verify(rc, never()).heal(any(MapLocation.class));
     }
 }
