@@ -16,7 +16,7 @@ public class HealerDuck extends Duck {
     public HealerDuck(RobotController rc) {
         super(rc);
         myTeam = rc.getTeam();
-        opTeam = rc.getTeam().opponent();
+        //opTeam = rc.getTeam().opponent();
         skill = SkillType.HEAL;
         //System.out.println("DBG: HealerDuck");
     }
@@ -26,6 +26,8 @@ public class HealerDuck extends Duck {
     public int exploreAround() throws GameActionException {
         int found_crumbs = 0 ;
         MapLocation[] closeByCrumbs = rc.senseNearbyCrumbs(GameConstants.VISION_RADIUS_SQUARED);
+        if (closeByCrumbs ==null)
+            return 0;
         while (closeByCrumbs.length > 0) {
             moveToward(closeByCrumbs[0]);
             closeByCrumbs = rc.senseNearbyCrumbs(GameConstants.VISION_RADIUS_SQUARED);

@@ -19,6 +19,4 @@ class DuckTest {
         rc = mock(RobotController.class);
         duck = new Duck(rc);
     }
-
-
 }
