@@ -10,14 +10,15 @@ import java.util.List;
 public class AttackerDuck extends Duck {
     public AttackerDuck(RobotController rc) {
         super(rc);
-
-
         skill = SkillType.ATTACK;
     }
 
     @Override
     public void play() throws GameActionException {
         super.setupPlay();
+        if (rc.canBuyGlobal(GlobalUpgrade.ATTACK)) {
+            rc.buyGlobal(GlobalUpgrade.ATTACK);
+        }
         attack();
         lookForFlag();
         move();

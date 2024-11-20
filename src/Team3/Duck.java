@@ -109,6 +109,7 @@ public class Duck {
     }
 
     public boolean moveToward(MapLocation location) throws GameActionException {
+        if(location == null) return false;
         Direction direction = rc.getLocation().directionTo(location);
         return moveToward(direction);
     }
