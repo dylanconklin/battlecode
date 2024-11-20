@@ -77,7 +77,7 @@ public class BuilderDuck extends Duck {
         }
     }
 
-    private void adaptiveTrapPlacement() throws GameActionException {
+    public void adaptiveTrapPlacement() throws GameActionException {
         RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(GameConstants.VISION_RADIUS_SQUARED, rc.getTeam().opponent());
 
         if (nearbyEnemies.length > 0) {

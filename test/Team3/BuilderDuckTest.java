@@ -45,4 +45,13 @@ class BuilderDuckTest {
         int result = builderDuck.gatherResources();
         assertEquals(1, result);
     }
+    @Test
+    public void testPlaceTrap() throws GameActionException {
+        MapLocation trapLocation = new MapLocation(0, 1);
+        when(rc.canBuild(TrapType.EXPLOSIVE, trapLocation)).thenReturn(true);
+        when(rc.getCrumbs()).thenReturn(100);
+        builderDuck.placeTrap(TrapType.EXPLOSIVE, trapLocation);
+        verify(rc, times(1)).build(TrapType.EXPLOSIVE, trapLocation);
+    }
+
 }
