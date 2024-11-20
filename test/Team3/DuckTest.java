@@ -19,7 +19,7 @@ class DuckTest {
         rc = mock(RobotController.class);
         duck = new Duck(rc);
     }
-//
+
 //    @Test
 //    public void testSetupPlay() throws GameActionException {
 //        MapLocation[] locations = new MapLocation[3];
@@ -57,6 +57,15 @@ class DuckTest {
         verify(rc, times(1)).build(TrapType.EXPLOSIVE, location);
         assertTrue(duck.hasCooldown());
     }
+    @Test
+    void testPlaceTrap1() throws GameActionException {
+        MapLocation location = new MapLocation(4, 4);
+        when(rc.canBuild(TrapType.STUN, location)).thenReturn(true);
+        duck.placeTrap(TrapType.STUN, location);
+        verify(rc, times(1)).build(TrapType.STUN, location);
+        assertTrue(duck.hasCooldown());
+    }
+
     @Test
     void testLookForFlag() throws GameActionException {
         FlagInfo flag = new FlagInfo(new MapLocation(3, 3), Team.A, true,12);

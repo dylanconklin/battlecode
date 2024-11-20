@@ -53,6 +53,13 @@ class BuilderDuckTest {
         when(rc.getCrumbs()).thenReturn(100);
         builderDuck.placeTrap(TrapType.EXPLOSIVE, trapLocation);
         verify(rc, times(1)).build(TrapType.EXPLOSIVE, trapLocation);
+    } @Test
+    public void testPlaceTrap1() throws GameActionException {
+        MapLocation trapLocation = new MapLocation(0, 1);
+        when(rc.canBuild(TrapType.EXPLOSIVE, trapLocation)).thenReturn(true);
+        when(rc.getCrumbs()).thenReturn(100);
+        builderDuck.placeTrap(TrapType.EXPLOSIVE, trapLocation);
+        verify(rc, times(1)).build(TrapType.EXPLOSIVE, trapLocation);
     }
     @Test
     public void testGuardFlag() throws GameActionException {
