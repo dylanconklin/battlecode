@@ -14,17 +14,17 @@ public class HealerDuck extends Duck {
         myTeam = rc.getTeam();
         opTeam = rc.getTeam().opponent();
         skill = SkillType.HEAL;
-        System.out.println("DBG: HealerDuck");
+        //System.out.println("DBG: HealerDuck");
     }
 
     // this method will return true / false based on the fact if it is healing or not. this return can be utilized
 
     public int exploreAround() throws GameActionException {
         int found_crumbs = 0 ;
-        MapLocation[] closeByCrumbs = rc.senseNearbyCrumbs(-1);
+        MapLocation[] closeByCrumbs = rc.senseNearbyCrumbs(GameConstants.VISION_RADIUS_SQUARED);
         while (closeByCrumbs.length > 0) {
             moveToward(closeByCrumbs[0]);
-            closeByCrumbs = rc.senseNearbyCrumbs(-1);
+            closeByCrumbs = rc.senseNearbyCrumbs(GameConstants.VISION_RADIUS_SQUARED);
             found_crumbs++;
         }
         return found_crumbs;
@@ -104,16 +104,17 @@ public class HealerDuck extends Duck {
             }
         }
         if (bestDirection != null) {
-            if (bestDirection != Direction.CENTER) {
-                System.out.println("heal move " + bestDirection);
+            if(rc.canMove(bestDirection)) {
                 rc.move(bestDirection);
             }
-
             if (rc.canHeal(bestTarget.location)) {
                 int a_heal_lvl = bestTarget.getHealth();
                 rc.heal(bestTarget.location);
+                RobotInfo updatedAlly = rc.senseRobotAtLocation(bestTarget.location);
+                if (updatedAlly != null) {
+                    System.out.println("Updated health after healing: " + updatedAlly.getHealth());
+                }
                 System.out.println("healing from: "+a_heal_lvl +" : "+bestTarget.getHealth());
-                rc.getExperience(skill);
                 didHeal = true;
             }
         }

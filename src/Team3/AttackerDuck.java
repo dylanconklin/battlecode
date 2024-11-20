@@ -5,7 +5,7 @@ import battlecode.common.*;
 public class AttackerDuck extends Duck {
     public AttackerDuck(RobotController rc) {
         super(rc);
-        System.out.println("DBG: AttackDuck");
+
 
         skill = SkillType.ATTACK;
     }
