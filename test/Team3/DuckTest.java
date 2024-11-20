@@ -19,6 +19,19 @@ class DuckTest {
         rc = mock(RobotController.class);
         duck = new Duck(rc);
     }
+//
+//    @Test
+//    public void testSetupPlay() throws GameActionException {
+//        MapLocation[] locations = new MapLocation[3];
+//        locations[0] = new MapLocation(1, 1);
+//        locations[1] = new MapLocation(2, 2);
+//        locations[2] = new MapLocation(3, 3);
+//        when(!rc.isSpawned()).thenReturn(false);
+//        when(rc.getAllySpawnLocations()).thenReturn(locations);
+//        duck.setupPlay();
+//        verify(rc).isSpawned();
+//        verify(rc).spawn(new MapLocation(5, 5));
+//    }
 
     @Test
     void testUpdateEnemyRobots() throws GameActionException {
@@ -77,11 +90,23 @@ class DuckTest {
         Direction direction = Direction.SOUTH;
         when(rc.getLocation()).thenReturn(new MapLocation(5, 5));
         when(rc.canMove(direction)).thenReturn(true);
-
         boolean result = duck.moveAwayFrom(enemyLocation);
-
         assertFalse(result);
-         //verify(rc, times(1)).move(direction);
     }
+
+    @Test
+    public void testMoveInRandomDirection() throws GameActionException {
+        MapLocation currentLocation = new MapLocation(0, 0); // Starting location of the robot
+        Direction direction = Direction.NORTH; // Direction to move towards
+        MapLocation targetLocation = currentLocation.add(direction); // Target location to move to
+        when(rc.getLocation()).thenReturn(currentLocation);
+        when(rc.canFill(targetLocation)).thenReturn(true);
+        doNothing().when(rc).fill(targetLocation);
+        boolean moved = duck.moveToward(direction);
+        verify(rc).canFill(targetLocation);
+        verify(rc).fill(targetLocation);
+        assertFalse(moved);
+    }
+
 
 }

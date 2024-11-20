@@ -14,6 +14,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 class BuilderDuckTest {
+    private enum State { SETUP, DEFENDING, EXPLORING }
     private BuilderDuck builderDuck;
     private RobotController rc;
 
@@ -53,5 +54,6 @@ class BuilderDuckTest {
         builderDuck.placeTrap(TrapType.EXPLOSIVE, trapLocation);
         verify(rc, times(1)).build(TrapType.EXPLOSIVE, trapLocation);
     }
+
 
 }

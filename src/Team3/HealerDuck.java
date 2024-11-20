@@ -93,14 +93,11 @@ public class HealerDuck extends Duck {
             if (direction != Direction.CENTER && !rc.canMove(direction)) {
                 continue;
             }
-
             MapLocation newLocation = rc.adjacentLocation(direction);
             RobotInfo newTarget = healTarget(newLocation, GameConstants.HEAL_RADIUS_SQUARED);
             if (newTarget == null) {
                 continue;
             }
-
-
             int score = newTarget.attackLevel + newTarget.healLevel + newTarget.buildLevel;
             if (newTarget.hasFlag) {
                 score += 1000;
@@ -121,8 +118,6 @@ public class HealerDuck extends Duck {
                 didHeal = true;
             }
         }
-
-
         return didHeal;
     }
 

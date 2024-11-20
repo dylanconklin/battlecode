@@ -3,10 +3,10 @@ package Team3;
 import battlecode.common.*;
 
 public class BuilderDuck extends Duck {
-    private enum State { SETUP, DEFENDING, EXPLORING }
-    private State state = State.SETUP;
-    private int trapCooldown = 0;
-    private static final int SENSING_RADIUS = 10; // Adjust based on game settings
+    public enum State { SETUP, DEFENDING, EXPLORING }
+    public State state = State.SETUP;
+    public int trapCooldown = 0;
+    public static final int SENSING_RADIUS = 10; // Adjust based on game settings
 
     public BuilderDuck(RobotController rc) {
         super(rc);

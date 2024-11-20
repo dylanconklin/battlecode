@@ -71,4 +71,5 @@ public class HealerDuckTest {
         target = healerDuck.healTarget(center, GameConstants.VISION_RADIUS_SQUARED);
         assertNull(target);
     }
+
 }
