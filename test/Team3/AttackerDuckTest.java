@@ -22,19 +22,11 @@ class AttackerDuckTest {
 
     }
 
-
-
     @Test
     public void testAttackNoEnemies() throws GameActionException {
-        // Mock no nearby enemies
         when(mockRc.senseNearbyRobots()).thenReturn(new RobotInfo[]{});
-
         int result = attackerDuck.attack();
-
-        // Ensure no attack occurred
         verify(mockRc, never()).attack(any(MapLocation.class));
         assertEquals(0, result, "Attack should return 0 when no enemies are nearby.");
     }
-
-
 }
