@@ -58,26 +58,17 @@ public class HealerDuckTest {
     }
     @Test
     void testHealTarget() throws GameActionException {
-        // Setup mock robots with varying priorities and health
         MapLocation center = new MapLocation(0, 0);
-
         RobotInfo[] robots = {
                 new RobotInfo(1, Team.A, 70, new MapLocation(1, 12), false, 1, 1, 1),
                 new RobotInfo(2, Team.B, 100, new MapLocation(1, 123), false, 1, 1, 1)
         };
-
         when(rc.senseNearbyRobots(center, GameConstants.VISION_RADIUS_SQUARED, Team.A)).thenReturn(robots);
-
-        // Call the healTarget method
         RobotInfo target = healerDuck.healTarget(center, GameConstants.VISION_RADIUS_SQUARED);
-
-        // Verify that the correct target was selected (Robot 1 should be chosen due to flag priority)
         assertNotNull(target);
-        assertEquals(robots[0], target);  // Robot 1 should be the target because it has the lowest health
-
-        // Check the behavior when no robots are within range
+        assertEquals(robots[0], target);
         when(rc.senseNearbyRobots(center, GameConstants.VISION_RADIUS_SQUARED, Team.A)).thenReturn(new RobotInfo[0]);
         target = healerDuck.healTarget(center, GameConstants.VISION_RADIUS_SQUARED);
-        assertNull(target);  // No robots in range, so target should be null
+        assertNull(target);
     }
 }
