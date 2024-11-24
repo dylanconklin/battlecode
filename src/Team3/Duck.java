@@ -8,6 +8,7 @@ import java.util.*;
 
 public class Duck {
     RobotController rc;
+
     SkillType skill;
     private static final Random rng = new Random();
     private int cooldown = 0;
@@ -16,6 +17,7 @@ public class Duck {
 
     public Duck(RobotController rc) {
         this.rc = rc;
+
     }
 
     public void updateEnemyRobots() throws GameActionException {
@@ -93,7 +95,11 @@ public class Duck {
         boolean didMove = false;
         for (Direction dir : randomDirections()) {
             didMove = moveToward(dir);
-            if (didMove) break;
+            if (didMove) {
+                //l.log("moving " + dir);
+                break;
+
+            }
         }
         return didMove;
     }
@@ -114,19 +120,36 @@ public class Duck {
         return moveToward(direction);
     }
 
-
+    private MapLocation lastPosition = null;
     public boolean moveToward(Direction direction) throws GameActionException {
+        MapLocation currentPosition  = rc.getLocation();
+        MapLocation nextLocation = null;
         boolean didMove = false;
+
         if (rc.canFill(rc.getLocation().add(direction))) {
             rc.fill(rc.getLocation().add(direction));
         }
+        Direction lowestprioDirection = null;
         for(Direction prioritizedDirection : getPrioritizedDirections(direction)) {
-            if (rc.canMove(prioritizedDirection)) {
-                rc.move(prioritizedDirection);
-                didMove = true;
-                break;
+            nextLocation = rc.getLocation().add(prioritizedDirection);
+            if ((rc.canMove(prioritizedDirection))) {
+                if( !nextLocation.equals(lastPosition))
+                {
+                    rc.move(prioritizedDirection);
+                    didMove = true;
+                    lastPosition = currentPosition;
+                    return didMove;
+                }
+                else {
+                    lowestprioDirection = prioritizedDirection;
+                }
             }
         }
+        if(lowestprioDirection != null) {
+            //System.out.println("dbg:"+lastPosition);
+            rc.move(lowestprioDirection);
+        }
+
         return didMove;
     }
 
