@@ -13,7 +13,6 @@ public strictfp class RobotPlayer {
     // Array containing all the possible movement directions.
     static final Direction[] directions = {Direction.NORTH, Direction.NORTHEAST, Direction.EAST, Direction.SOUTHEAST, Direction.SOUTH, Direction.SOUTHWEST, Direction.WEST, Direction.NORTHWEST,};
     static int turnCount = 0;
-    //public Logger l = Logger.getInstance("debuglog.txt");
     // Make sure you spawn your robot in before you attempt to take any actions!
     // Robots not spawned in do not have vision of any tiles and cannot perform any actions.
     public static Duck spawn(RobotController rc) throws GameActionException {

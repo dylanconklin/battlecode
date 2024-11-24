@@ -115,7 +115,6 @@ public class HealerDuck extends Duck {
             }
             if (rc.canHeal(bestTarget.location)) {
                 rc.heal(bestTarget.location);
-
                 didHeal = true;
             }
         }
