@@ -1,21 +1,46 @@
 package Team3;
 
 import battlecode.common.*;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Random;
 
-import java.util.*;
-
 public class Duck {
-    RobotController rc;
+    final RobotController rc;
     SkillType skill;
-    private static final Random rng = new Random();
     private int cooldown = 0;
     protected static final int FLAG_DROP_TIME = GameConstants.FLAG_DROPPED_RESET_ROUNDS;
     protected static int flagTimer = 0;
+    static final int healthThreshold = 300;
+    // Array containing all the possible movement directions.
+    static final Direction[] DIRECTIONS = {Direction.NORTH, Direction.NORTHEAST, Direction.EAST, Direction.SOUTHEAST, Direction.SOUTH, Direction.SOUTHWEST, Direction.WEST, Direction.NORTHWEST};
 
-    public Duck(RobotController rc) {
+    // We have duplicates here, which are we keeping?
+    // private static final Random RNG = new Random();
+    static final Random RNG = new Random(6147);
+
+    public Duck(final RobotController rc) {
         this.rc = rc;
+    }
+
+    public static Duck spawn(final RobotController rc) throws GameActionException {
+        while (!rc.isSpawned()) {
+            MapLocation[] spawnLocs = rc.getAllySpawnLocations();
+            // Pick a random spawn location to attempt spawning in.
+            MapLocation randomLoc = spawnLocs[RNG.nextInt(spawnLocs.length)];
+            if (rc.canSpawn(randomLoc)) {
+                rc.spawn(randomLoc);
+            }
+        }
+        int choice = RNG.nextInt(3);
+        if (choice == 0) {
+            return new AttackerDuck(rc);
+        } else if (choice == 1) {
+            return new HealerDuck(rc);
+        } else {
+            return new BuilderDuck(rc);
+        }
     }
 
     public void updateEnemyRobots() throws GameActionException {
@@ -38,7 +63,7 @@ public class Duck {
 
     public void setupPlay() throws GameActionException {
         if (!rc.isSpawned()) {
-            RobotPlayer.spawn(rc);
+            spawn(rc);
         }
     }
 
@@ -49,7 +74,7 @@ public class Duck {
             moveToward(allySpawnZoneDirection());
         }
         // Move and attack randomly if no objective.
-        Direction dir = RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
+        Direction dir = DIRECTIONS[RNG.nextInt(DIRECTIONS.length)];
         MapLocation nextLoc = rc.getLocation().add(dir);
         if (rc.canMove(dir)) {
             rc.move(dir);
@@ -59,8 +84,9 @@ public class Duck {
 
         // Rarely attempt placing traps behind the robot.
         MapLocation prevLoc = rc.getLocation().subtract(dir);
-        if (rc.canBuild(TrapType.EXPLOSIVE, prevLoc) && RobotPlayer.rng.nextInt() % 37 == 1)
+        if (rc.canBuild(TrapType.EXPLOSIVE, prevLoc) && RNG.nextInt() % 37 == 1) {
             rc.build(TrapType.EXPLOSIVE, prevLoc);
+        }
         // We can also move our code into different methods or classes to better organize it!
         updateEnemyRobots();
     }
@@ -78,7 +104,7 @@ public class Duck {
         return pickedUpFlag;
     }
 
-    public boolean moveAwayFrom(MapLocation location) throws GameActionException {
+    public boolean moveAwayFrom(final MapLocation location) throws GameActionException {
         Direction direction = rc.getLocation().directionTo(location).opposite();
         return moveToward(direction);
     }
@@ -93,7 +119,9 @@ public class Duck {
         boolean didMove = false;
         for (Direction dir : randomDirections()) {
             didMove = moveToward(dir);
-            if (didMove) break;
+            if (didMove) {
+                break;
+            }
         }
         return didMove;
     }
@@ -108,18 +136,18 @@ public class Duck {
         return allySpawnZoneDirection().opposite();
     }
 
-    public boolean moveToward(MapLocation location) throws GameActionException {
+    public boolean moveToward(final MapLocation location) throws GameActionException {
         Direction direction = rc.getLocation().directionTo(location);
         return moveToward(direction);
     }
 
 
-    public boolean moveToward(Direction direction) throws GameActionException {
+    public boolean moveToward(final Direction direction) throws GameActionException {
         boolean didMove = false;
         if (rc.canFill(rc.getLocation().add(direction))) {
             rc.fill(rc.getLocation().add(direction));
         }
-        for(Direction prioritizedDirection : getPrioritizedDirections(direction)) {
+        for (Direction prioritizedDirection : getPrioritizedDirections(direction)) {
             if (rc.canMove(prioritizedDirection)) {
                 rc.move(prioritizedDirection);
                 didMove = true;
@@ -151,7 +179,7 @@ public class Duck {
         return cooldown > 0;
     }
 
-    public void applyCooldown(int amount) {
+    public void applyCooldown(final int amount) {
         cooldown += amount;
     }
 
@@ -170,7 +198,7 @@ public class Duck {
         }
     }
 
-    public void placeTrap(TrapType trapType, MapLocation location) throws GameActionException {
+    public void placeTrap(final TrapType trapType, final MapLocation location) throws GameActionException {
         if (trapType == TrapType.EXPLOSIVE && rc.canBuild(TrapType.EXPLOSIVE, location) && !hasCooldown()) {
             rc.build(TrapType.EXPLOSIVE, location);
             applyCooldown(GameConstants.FILL_COOLDOWN);
@@ -247,7 +275,7 @@ public class Duck {
     }
 
     // This returns an array of all possible directions in order of priority based on the seed direction(primaryDirection)
-    private ArrayList<Direction> getPrioritizedDirections(Direction primaryDirection) throws GameActionException {
+    private ArrayList<Direction> getPrioritizedDirections(final Direction primaryDirection) throws GameActionException {
         ArrayList<Direction> result = new ArrayList<>();
         ArrayList<Direction> directions = directions();
         int direction = directions.indexOf(primaryDirection);
@@ -255,7 +283,7 @@ public class Duck {
         result.add(primaryDirection);
         while (moveCounter * 2 < directions.size()) {
             // Randomize whether we're going left or right, then add both directions
-            direction *= rng.nextBoolean() ? 1 : -1;
+            direction *= RNG.nextBoolean() ? 1 : -1;
             result.add(directions.get(direction < 0 ? direction + directions.size() : direction % directions.size()));
             direction *= -1;
             result.add(directions.get(direction < 0 ? direction + directions.size() : direction % directions.size()));
