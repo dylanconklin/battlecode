@@ -38,7 +38,7 @@ class BuilderDuckTest {
         locations[0] = new MapLocation(1, 1);
         locations[1] = new MapLocation(2, 2);
         locations[2] = new MapLocation(3, 3);
-        Direction dir = Duck.DIRECTIONS[Duck.RNG.nextInt(Duck.DIRECTIONS.length)];
+        Direction dir = RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
         when(rc.senseNearbyCrumbs(-1)).thenReturn(locations);
         when(rc.getLocation()).thenReturn(locations[0]);
         when(builderDuck.moveToward(dir)).thenReturn(true);
