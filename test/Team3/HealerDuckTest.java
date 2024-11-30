@@ -32,7 +32,7 @@ public class HealerDuckTest {
         locations[0] = new MapLocation(1, 1);
         locations[1] = new MapLocation(2, 2);
         locations[2] = new MapLocation(3, 3);
-        Direction dir = Duck.DIRECTIONS[Duck.RNG.nextInt(Duck.DIRECTIONS.length)];
+        Direction dir = RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
         //when(rc.getTeam()).thenReturn(Team.valueOf("Team"));
         when(rc.senseNearbyCrumbs(-1)).thenReturn(locations);
         when(rc.getLocation()).thenReturn(locations[0]);
@@ -43,7 +43,7 @@ public class HealerDuckTest {
     }
     @Test
     void testHeal() throws GameActionException {
-        boolean a= healerDuck.healAlly();
+        boolean a= healerDuck.heal_ally();
         RobotController mockedRc = Mockito.mock(RobotController.class);
         assertFalse(a);
     }

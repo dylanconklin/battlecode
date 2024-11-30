@@ -1,5 +1,0 @@
-checkstyle {
-    toolVersion = "10.12.0" // Use the latest version
-    configFile = file("config/checkstyle/checkstyle.xml")
-}
-
