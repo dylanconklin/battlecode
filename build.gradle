@@ -3,9 +3,9 @@
 apply plugin: 'java'
 apply plugin: 'scala'
 
-plugins {
-  id 'checkstyle'
-}
+//plugins {
+//  id 'checkstyle'
+//}
 
 // Compatibility version: Java 8
 sourceCompatibility = 1.8
