@@ -17,8 +17,6 @@ class DuckTest {
     @BeforeEach
     public void setUp() {
         rc = mock(RobotController.class);
-        duck = new Duck(rc);
+        duck = new Duck(rc, SkillType.ATTACK);
     }
-
-
 }

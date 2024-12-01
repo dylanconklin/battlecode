@@ -2,17 +2,16 @@ package Team3;
 
 import battlecode.common.*;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 
-public class AttackerDuck extends Duck {
-    public AttackerDuck(RobotController rc) {
-        super(rc);
-        System.out.println("DBG: AttackDuck");
-
-        skill = SkillType.ATTACK;
+public final class AttackerDuck extends Duck {
+    /**
+     * Constructor for AttackerDuck.
+     * @param rc
+     */
+    public AttackerDuck(final RobotController rc) {
+        super(rc, SkillType.ATTACK);
     }
 
     @Override
@@ -23,29 +22,48 @@ public class AttackerDuck extends Duck {
         move();
     }
 
+    /**
+     * Look for nearby ducks to attack.
+     * @return Number of ducks attacked
+     * @throws GameActionException
+     */
     public int attack() throws GameActionException {
-        RobotInfo[] robotInfos = rc.senseNearbyRobots();
+        RobotController rc = getRobotController();
+        RobotInfo[] robotInfos = Arrays.stream(rc.senseNearbyRobots())
+                .filter(robot -> rc.getTeam() != robot.getTeam())
+                .toArray(RobotInfo[]::new);
+        int ducksAttacked = 0;
         for (RobotInfo robot : robotInfos) {
             if (rc.canAttack(robot.location)) {
+                ducksAttacked++;
                 rc.attack(robot.location);
             }
         }
-        return robotInfos.length;
+        return ducksAttacked;
     }
 
-    public int move() throws GameActionException {
-        RobotInfo[] enemies = Arrays.stream(rc.senseNearbyRobots()).filter(robot -> robot.getTeam() != rc.getTeam()).sorted(Comparator.comparing(r -> r.getHealth())).toArray(RobotInfo[]::new);
-        if (enemies.length > 0 && rc.getHealth() >= 300) {
-            moveToward(enemies[0].location);
-        } else if (rc.hasFlag() || rc.getHealAmount() < 300) {
+    /**
+     * Select movement strategy and move.
+     * @return True if Duck moved, False if it didn't
+     * @throws GameActionException
+     */
+    public boolean move() throws GameActionException {
+        RobotController rc = getRobotController();
+        boolean didMove = false;
+        RobotInfo[] enemies = Arrays.stream(rc.senseNearbyRobots())
+                .filter(robot -> robot.getTeam() != rc.getTeam())
+                .sorted(Comparator.comparing(r -> r.getHealth()))
+                .toArray(RobotInfo[]::new);
+        if (enemies.length > 0 && rc.getHealth() >= HEALTH_THRESHOLD) {
+            didMove = moveToward(enemies[0].location);
+        } else if (rc.hasFlag() || rc.getHealAmount() < HEALTH_THRESHOLD) {
             // move toward ally spawn locations
-            // TODO: don't move blindly toward locations[0]
-            moveToward(allySpawnZoneDirection());
+            didMove = moveToward(allySpawnZoneDirection());
         } else if (rc.getRoundNum() <= GameConstants.SETUP_ROUNDS) {
-            moveInRandomDirection();
+            didMove = moveInRandomDirection();
         } else {
-            moveToward(enemySpawnZoneDirection());
+            didMove = moveToward(enemySpawnZoneDirection());
         }
-        return 1;
+        return didMove;
     }
 }

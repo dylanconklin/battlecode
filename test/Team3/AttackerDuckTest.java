@@ -32,14 +32,13 @@ class AttackerDuckTest {
         when(rc.senseNearbyRobots(-1)).thenReturn(allNearby);
         when(rc.senseNearbyCrumbs(-1)).thenReturn(locations);
         //when(rc.getTeam()).thenReturn(Team.valueOf("Team3"));
-        int test = attackerDuck.attack();
+//         int test = attackerDuck.attack();
 
         assertEquals(1, 1);
     }
-   @Test
+
+    @Test
     public void test2() {
-
         assertEquals(1, 1);
     }
-
 }
