@@ -3,22 +3,22 @@ package Team3;
 import battlecode.common.*;
 
 public class BuilderDuck extends Duck {
-    public enum State { SETUP, DEFENDING, EXPLORING }
-    public State state = State.SETUP;
-    public int trapCooldown = 0;
-    public static final int SENSING_RADIUS = 10; // Adjust based on game settings
+    private enum State { SETUP, DEFENDING, EXPLORING }
+    private State state = State.SETUP;
+    private int trapCooldown = 0;
+    private int cooldown = 0;
+
+    // Adjust based on game settings
+    private static final int SENSING_RADIUS = 10;
 
     public BuilderDuck(RobotController rc) {
-        super(rc);
-        skill = SkillType.BUILD;
+        super(rc, SkillType.BUILD);
     }
 
     @Override
     public void play() throws GameActionException {
+        RobotController rc = getRobotController();
         super.setupPlay();
-        if (rc.canBuyGlobal(GlobalUpgrade.CAPTURING)) {
-            rc.buyGlobal(GlobalUpgrade.CAPTURING);
-        }
 
         lookForFlag();
 
@@ -45,7 +45,8 @@ public class BuilderDuck extends Duck {
         reduceCooldown();
     }
 
-    public void setupDefensivePerimeter() throws GameActionException {
+    private void setupDefensivePerimeter() throws GameActionException {
+        RobotController rc = getRobotController();
         MapLocation allyFlagLocation = rc.getLocation().add(allySpawnZoneDirection());
 
         for (Direction dir : Direction.allDirections()) {
@@ -64,7 +65,8 @@ public class BuilderDuck extends Duck {
         }
     }
 
-    public void guardFlag() throws GameActionException {
+    private void guardFlag() throws GameActionException {
+        RobotController rc = getRobotController();
         MapLocation flagLocation = rc.getLocation(); // Assuming the flag location is the robot's current location
 
         // Check for nearby enemies and adjust state based on threat level
@@ -77,7 +79,8 @@ public class BuilderDuck extends Duck {
         }
     }
 
-    public void adaptiveTrapPlacement() throws GameActionException {
+    private void adaptiveTrapPlacement() throws GameActionException {
+        RobotController rc = getRobotController();
         RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(GameConstants.VISION_RADIUS_SQUARED, rc.getTeam().opponent());
 
         if (nearbyEnemies.length > 0) {
@@ -130,24 +133,29 @@ public class BuilderDuck extends Duck {
         return null;
     }
 
-    @Override
-    public void collectCrumbs() throws GameActionException {
-        MapLocation[] crumbLocations = rc.senseNearbyCrumbs(GameConstants.VISION_RADIUS_SQUARED);
-    if(crumbLocations != null) {
-        if (crumbLocations.length > 0) {
-            moveToward(crumbLocations[0]); // Move towards the nearest crumb location
-        } else {
-            moveInRandomDirection(); // Explore randomly if no crumbs are nearby
-        }
-    }
-    }
-
     public void placeTrap(TrapType trapType, MapLocation targetLocation) throws GameActionException {
+        RobotController rc = getRobotController();
         if (rc.canBuild(trapType, targetLocation) && !hasCooldown()) {
             rc.build(trapType, targetLocation);
             applyCooldown(GameConstants.FILL_COOLDOWN); // Assuming FILL_COOLDOWN for trap building
             trapCooldown = 15; // Cooldown reset for trap placement
             // System.out.println("Placed " + trapType + " trap at: " + targetLocation);
         }
+    }
+
+    public boolean hasCooldown() {
+        return cooldown > 0;
+    }
+
+    public int applyCooldown(final int amount) {
+        cooldown += amount;
+        return cooldown;
+    }
+
+    public int reduceCooldown() {
+        if (cooldown > 0) {
+            cooldown--;
+        }
+        return cooldown;
     }
 }

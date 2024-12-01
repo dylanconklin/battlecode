@@ -24,7 +24,6 @@ public class HealerDuckTest {
         healerDuck = new HealerDuck(rc);
     }
 
-
     @Test
     void testHealerExploreAround() throws GameActionException {
         // Create an array of MapLocation with a size of 3
@@ -32,7 +31,7 @@ public class HealerDuckTest {
         locations[0] = new MapLocation(1, 1);
         locations[1] = new MapLocation(2, 2);
         locations[2] = new MapLocation(3, 3);
-        Direction dir = RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
+        Direction dir = RobotPlayer.DIRECTIONS[RobotPlayer.RNG.nextInt(RobotPlayer.DIRECTIONS.length)];
         //when(rc.getTeam()).thenReturn(Team.valueOf("Team"));
         when(rc.senseNearbyCrumbs(-1)).thenReturn(locations);
         when(rc.getLocation()).thenReturn(locations[0]);

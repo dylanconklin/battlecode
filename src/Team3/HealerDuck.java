@@ -14,19 +14,19 @@ public class HealerDuck extends Duck {
     private Team opTeam = null;
 
     public HealerDuck(RobotController rc) {
-        super(rc);
+        super(rc, SkillType.HEAL);
         myTeam = rc.getTeam();
         opTeam = rc.getTeam().opponent();
-        skill = SkillType.HEAL;
         System.out.println("DBG: HealerDuck");
     }
 
     // this method will return true / false based on the fact if it is healing or not. this return can be utilized
 
     public int exploreAround() throws GameActionException {
+        RobotController rc = getRobotController();
         int found_crumbs = 0 ;
         MapLocation[] closeByCrumbs = rc.senseNearbyCrumbs(-1);
-        while (closeByCrumbs.length > 0) {
+        if (closeByCrumbs.length > 0) {
             moveToward(closeByCrumbs[0]);
             closeByCrumbs = rc.senseNearbyCrumbs(-1);
             found_crumbs++;
@@ -36,6 +36,7 @@ public class HealerDuck extends Duck {
 
     @Override
     public void play() throws GameActionException {
+        RobotController rc = getRobotController();
         super.setupPlay();
         MapLocation ml = rc.getLocation();
         if (!heal_ally()) {  // Try to heal first, and only proceed if no healing was done
@@ -46,6 +47,7 @@ public class HealerDuck extends Duck {
 
     }
     private RobotInfo healTarget(MapLocation c,int r) throws GameActionException {
+        RobotController rc = getRobotController();
         RobotInfo target = null;
         int minHealth = Integer.MAX_VALUE;
         int maxPriority = Integer.MIN_VALUE;
@@ -72,6 +74,7 @@ public class HealerDuck extends Duck {
     }
 
     public boolean heal_ally() throws GameActionException {
+        RobotController rc = getRobotController();
         // heal () is only done if no opponent in vision_radius.
         if (!rc.isActionReady() || rc.senseNearbyRobots(GameConstants.VISION_RADIUS_SQUARED,rc.getTeam().opponent() ).length > 0) {
             return false;
@@ -117,7 +120,7 @@ public class HealerDuck extends Duck {
                 int a_heal_lvl = bestTarget.getHealth();
                 rc.heal(bestTarget.location);
                 System.out.println("healing from: "+a_heal_lvl +" : "+bestTarget.getHealth());
-                rc.getExperience(skill);
+                rc.getExperience(getSkill());
                 didHeal = true;
             }
         }
@@ -127,6 +130,7 @@ public class HealerDuck extends Duck {
     }
 
     public void move() throws GameActionException {
+        RobotController rc = getRobotController();
         RobotInfo[] ducksToHeal = Arrays.stream(rc.senseNearbyRobots()).filter(robot -> robot.getTeam() == rc.getTeam() && robot.getHealth() <= 300).sorted(Comparator.comparing(r -> r.getHealth())).toArray(RobotInfo[]::new);
         if (ducksToHeal.length > 0) {
             moveToward(ducksToHeal[0].getLocation());
