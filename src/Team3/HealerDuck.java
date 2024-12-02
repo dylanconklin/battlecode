@@ -17,7 +17,6 @@ public class HealerDuck extends Duck {
         super(rc, SkillType.HEAL);
         myTeam = rc.getTeam();
         opTeam = rc.getTeam().opponent();
-        System.out.println("DBG: HealerDuck");
     }
 
     // this method will return true / false based on the fact if it is healing or not. this return can be utilized
@@ -42,6 +41,7 @@ public class HealerDuck extends Duck {
         if (!heal_ally()) {  // Try to heal first, and only proceed if no healing was done
             lookForFlag();
             exploreAround();
+            attack();
             move();
         }
 
@@ -141,5 +141,15 @@ public class HealerDuck extends Duck {
         } else {
             moveInRandomDirection();
         }
+    }
+    public int attack() throws GameActionException {
+        RobotController rc = getRobotController();
+        RobotInfo[] robotInfos = rc.senseNearbyRobots(GameConstants.VISION_RADIUS_SQUARED,opTeam);
+        for (RobotInfo robot : robotInfos) {
+            if (rc.canAttack(robot.location)) {
+                rc.attack(robot.location);
+            }
+        }
+        return robotInfos.length;
     }
 }
