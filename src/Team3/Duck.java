@@ -1,6 +1,7 @@
 package Team3;
 
 import battlecode.common.*;
+import battlecode.world.Trap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,7 +52,9 @@ public class Duck {
     public static ArrayList<Direction> randomDirections() {
         ArrayList<Direction> directions = new ArrayList<Direction>(
                 Arrays.asList(Direction.allDirections()));
+        directions.remove(Direction.CENTER);
         Collections.shuffle(directions);
+        directions.add(Direction.CENTER);
         return directions;
     }
 
@@ -64,8 +67,7 @@ public class Duck {
 
     static ArrayList<TrapType> trapTypes() {
         ArrayList<TrapType> trapTypes = new ArrayList<>(
-                Arrays.asList(TrapType.values()));
-        trapTypes.remove(TrapType.NONE);
+                Arrays.asList(TrapType.EXPLOSIVE, TrapType.STUN, TrapType.WATER, TrapType.NONE));
         return trapTypes;
     }
 
@@ -138,33 +140,40 @@ public class Duck {
     /**
      * Decider for what move to make.
      *
+     * @return True if Duck finished a turn successfully, False otherwise
      * @throws GameActionException
      */
-    public void play() throws GameActionException {
-        lookForFlag();
+    public boolean play() throws GameActionException {
+        boolean playedSuccessfully = false;
+        try {
+            lookForFlag();
 
-        while (rc.hasFlag() && rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
-            moveToward(allySpawnZoneDirection());
-        }
-        // Move and attack randomly if no objective.
-        Direction dir = RobotPlayer.DIRECTIONS[
-                RobotPlayer.RNG.nextInt(RobotPlayer.DIRECTIONS.length)];
-        MapLocation nextLoc = rc.getLocation().add(dir);
-        if (rc.canMove(dir)) {
-            rc.move(dir);
-        } else if (rc.canAttack(nextLoc)) {
-            rc.attack(nextLoc);
-        }
+            while (rc.hasFlag() && rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
+                moveToward(allySpawnZoneDirection());
+            }
+            // Move and attack randomly if no objective.
+            Direction dir = RobotPlayer.DIRECTIONS[
+                    RobotPlayer.RNG.nextInt(RobotPlayer.DIRECTIONS.length)];
+            MapLocation nextLoc = rc.getLocation().add(dir);
+            if (rc.canMove(dir)) {
+                rc.move(dir);
+            } else if (rc.canAttack(nextLoc)) {
+                rc.attack(nextLoc);
+            }
 
-        // Rarely attempt placing traps behind the robot.
-        MapLocation prevLoc = rc.getLocation().subtract(dir);
-        if (rc.canBuild(TrapType.EXPLOSIVE, prevLoc)
-                && RobotPlayer.RNG.nextInt() % THIRTYSEVEN == 1) {
-            rc.build(TrapType.EXPLOSIVE, prevLoc);
+            // Rarely attempt placing traps behind the robot.
+            MapLocation prevLoc = rc.getLocation().subtract(dir);
+            if (rc.canBuild(TrapType.EXPLOSIVE, prevLoc)
+                    && RobotPlayer.RNG.nextInt() % THIRTYSEVEN == 1) {
+                rc.build(TrapType.EXPLOSIVE, prevLoc);
+            }
+            // We can also move our code into different methods or classes
+            // to better organize it!
+            updateEnemyRobots();
+            playedSuccessfully = true;
+        } catch (GameActionException e) {
         }
-        // We can also move our code into different methods or classes
-        // to better organize it!
-        updateEnemyRobots();
+        return playedSuccessfully;
     }
 
     /**

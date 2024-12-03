@@ -16,11 +16,17 @@ public final class AttackerDuck extends Duck {
     }
 
     @Override
-    public void play() throws GameActionException {
-        super.setupPlay();
-        attack();
-        lookForFlag();
-        move();
+    public boolean play() throws GameActionException {
+        boolean playedSuccessfully = false;
+        try {
+            super.setupPlay();
+            attack();
+            lookForFlag();
+            move();
+            playedSuccessfully = true;
+        } catch (GameActionException e) {
+        }
+        return playedSuccessfully;
     }
 
     /**
@@ -31,17 +37,19 @@ public final class AttackerDuck extends Duck {
      */
     public int attack() throws GameActionException {
         RobotController rc = getRobotController();
-        RobotInfo[] robotInfos = Arrays.stream(rc.senseNearbyRobots())
+        MapLocation[] enemyLocations = Arrays.stream(rc.senseNearbyRobots())
                 .filter(robot -> rc.getTeam() != robot.getTeam())
-                .toArray(RobotInfo[]::new);
-        int ducksAttacked = 0;
-        for (RobotInfo robot : robotInfos) {
-            if (rc.canAttack(robot.location)) {
-                ducksAttacked++;
-                rc.attack(robot.location);
+                .filter(robot -> rc.canAttack(robot.location))
+                .map(robot -> robot.location)
+                .toArray(MapLocation[]::new);
+        for (MapLocation location : enemyLocations) {
+            try {
+                rc.attack(location);
+            } catch (GameActionException e) {
+                break;
             }
         }
-        return ducksAttacked;
+        return enemyLocations.length;
     }
 
     /**
