@@ -8,6 +8,7 @@ import java.util.Comparator;
 public final class AttackerDuck extends Duck {
     /**
      * Constructor for AttackerDuck.
+     *
      * @param rc
      */
     public AttackerDuck(final RobotController rc) {
@@ -24,6 +25,7 @@ public final class AttackerDuck extends Duck {
 
     /**
      * Look for nearby ducks to attack.
+     *
      * @return Number of ducks attacked
      * @throws GameActionException
      */
@@ -44,6 +46,7 @@ public final class AttackerDuck extends Duck {
 
     /**
      * Select movement strategy and move.
+     *
      * @return True if Duck moved, False if it didn't
      * @throws GameActionException
      */

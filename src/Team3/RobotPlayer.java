@@ -1,6 +1,7 @@
 package Team3;
 
 import battlecode.common.*;
+
 import java.util.Random;
 
 /**
@@ -9,7 +10,6 @@ import java.util.Random;
  * this is what we'll call once your robot is created!
  */
 public final class RobotPlayer {
-    private RobotPlayer() { }
     /**
      * Random number generator.
      */
@@ -17,14 +17,22 @@ public final class RobotPlayer {
     /**
      * Array containing all the possible movement directions.
      */
-    static final Direction[] DIRECTIONS = {Direction.NORTH, Direction.NORTHEAST,
-            Direction.EAST, Direction.SOUTHEAST, Direction.SOUTH,
-            Direction.SOUTHWEST, Direction.WEST, Direction.NORTHWEST};
+    static final Direction[] DIRECTIONS = {Direction.NORTH,
+            Direction.NORTHEAST,
+            Direction.EAST,
+            Direction.SOUTHEAST,
+            Direction.SOUTH,
+            Direction.SOUTHWEST,
+            Direction.WEST,
+            Direction.NORTHWEST};
+    private RobotPlayer() {
+    }
 
     /**
      * Make sure you spawn your robot in before you attempt to take any actions!
      * Robots not spawned in do not have vision of any tiles and cannot perform
      * any actions.
+     *
      * @param rc
      * @return The Duck
      * @throws GameActionException
@@ -47,7 +55,7 @@ public final class RobotPlayer {
         } else {
             return new BuilderDuck(rc);
         }
-   }
+    }
 
     /**
      * run() is the method that is called when a robot is instantiated in the
