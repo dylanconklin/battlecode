@@ -59,7 +59,7 @@ class DuckTest {
 
         boolean result = duck.moveAwayFrom(enemyLocation);
 
-        assertTrue(result, "Duck should move away from the enemy location");
+        assertTrue(result);
         verify(rc, atLeastOnce()).move(any(Direction.class));
     }
 
@@ -74,7 +74,7 @@ class DuckTest {
 
         boolean moved = duck.moveToward(direction);
 
-        assertTrue(moved, "Duck should move toward the specified direction");
+        assertTrue(moved);
         verify(rc, times(1)).move(direction);
     }
 
@@ -84,7 +84,7 @@ class DuckTest {
 
         boolean moved = duck.moveInRandomDirection();
 
-        assertTrue(moved, "Duck should move in a random direction");
+        assertTrue(moved);
         verify(rc, atLeastOnce()).move(any(Direction.class));
     }
 
