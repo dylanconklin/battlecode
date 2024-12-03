@@ -45,7 +45,7 @@ public class BuilderDuck extends Duck {
         collectCrumbs();
 
         // Move if no specific task is immediately required
-        move();
+        moveInRandomDirection();
     }
 
     /**
@@ -106,44 +106,6 @@ public class BuilderDuck extends Duck {
             if (rc.canFill(targetLocation)) {
                 rc.fill(targetLocation);
                 break;
-            }
-        }
-    }
-
-    /**
-     * Collect crumbs to maintain a supply for building and defending.
-     *
-     * @return True if Duck moved, False otherwise
-     * @throws GameActionException
-     */
-    @Override
-    public boolean collectCrumbs() throws GameActionException {
-        RobotController rc = getRobotController();
-        MapLocation[] crumbLocations = rc.senseNearbyCrumbs(
-                GameConstants.VISION_RADIUS_SQUARED);
-        boolean didMove = false;
-        if (crumbLocations.length > 0) {
-            didMove = moveToward(crumbLocations[0]);
-        } else {
-            didMove = moveInRandomDirection();
-        }
-        return didMove;
-    }
-
-    /**
-     * Move towards important areas or explore randomly.
-     *
-     * @throws GameActionException
-     */
-    public void move() throws GameActionException {
-        RobotController rc = getRobotController();
-
-        // If no immediate tasks are required, move randomly
-        if (!moveInRandomDirection()) {
-            Direction randomDirection = RobotPlayer.DIRECTIONS[
-                    RobotPlayer.RNG.nextInt(RobotPlayer.DIRECTIONS.length)];
-            if (rc.canMove(randomDirection)) {
-                rc.move(randomDirection);
             }
         }
     }
