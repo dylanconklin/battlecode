@@ -87,5 +87,33 @@ class DuckTest {
         assertTrue(moved);
         verify(rc, atLeastOnce()).move(any(Direction.class));
     }
+    @Test
+    void testAllySpawnZoneDirection() throws GameActionException {
+        MapLocation currentLocation = new MapLocation(5, 5);
+        MapLocation allySpawn1 = new MapLocation(10, 10);
+        MapLocation allySpawn2 = new MapLocation(15, 15);
+        MapLocation[] allySpawns = { allySpawn1, allySpawn2 };
+        when(rc.getLocation()).thenReturn(currentLocation);
+        when(rc.getAllySpawnLocations()).thenReturn(allySpawns);
+        Direction expectedDirection = currentLocation.directionTo(allySpawn1);
+        Direction result = duck.allySpawnZoneDirection();
+        assertNotNull(result);
+
+    }
+    @Test
+    void testCollectCrumbs() throws GameActionException {
+        MapLocation currentLocation = new MapLocation(5, 5);
+        MapLocation crumbLocation = new MapLocation(6, 6);
+        MapLocation[] crumbs = { crumbLocation };
+
+        when(rc.getLocation()).thenReturn(currentLocation);
+        when(rc.senseNearbyCrumbs(GameConstants.VISION_RADIUS_SQUARED)).thenReturn(crumbs);
+        when(rc.canMove(currentLocation.directionTo(crumbLocation))).thenReturn(true);
+
+        boolean result = duck.collectCrumbs();
+
+        assertTrue(result);
+        verify(rc, times(1)).move(currentLocation.directionTo(crumbLocation));
+    }
 
 }
