@@ -224,46 +224,6 @@ public class Duck {
         }
         return didMove;
     }
-    //testing new
-    public boolean moveInRandomDirection() throws GameActionException {
-        MapLocation currentPosition = rc.getLocation();
-        for (Direction dir : randomDirections()) {
-            MapLocation targetLocation = currentPosition.add(dir);
-            if (lastPosition == null || !targetLocation.equals(lastPosition)) {
-                if (rc.canMove(dir)) {
-                    rc.move(dir);
-                    lastPosition = currentPosition;
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-    private boolean moveAvoidingClutter() throws GameActionException {
-        RobotInfo[] nearbyAllies = rc.senseNearbyRobots(-1, rc.getTeam());
-        MapLocation currentLocation = rc.getLocation();
-
-        for (Direction dir : randomDirections()) {
-            MapLocation targetLocation = currentLocation.add(dir);
-
-            // Avoid moving into cluttered areas
-            boolean isCluttered = false;
-            for (RobotInfo ally : nearbyAllies) {
-                if (targetLocation.distanceSquaredTo(ally.getLocation()) < 4) { // Minimum spacing
-                    isCluttered = true;
-                    break;
-                }
-            }
-
-            if (!isCluttered && rc.canMove(dir)) {
-                rc.move(dir);
-                return true;
-            }
-        }
-        return false;
-    }
-
-
 
     /**
      * Get direction toward ally spawn zone.
@@ -319,49 +279,6 @@ public class Duck {
         }
         return didMove;
     }
-    //new implementaiont
-    private MapLocation lastPosition = null;
-    public boolean moveToward(Direction direction) throws GameActionException {
-        boolean didMove = false;
-        MapLocation currentPosition = rc.getLocation();
-        MapLocation targetLocation = currentPosition.add(direction);
-        RobotInfo[] nearbyAllies = rc.senseNearbyRobots(-1, rc.getTeam());  // Detect nearby allies to avoid clutter
-
-        // Fill the target location if possible
-        if (rc.canFill(targetLocation)) {
-            rc.fill(targetLocation);
-        }
-
-        for (Direction prioritizedDirection : getPrioritizedDirections(direction)) {
-            MapLocation prioritizedTarget = currentPosition.add(prioritizedDirection);
-
-            // Check if the prioritized target is the last position (avoid moving back)
-            if (lastPosition != null && prioritizedTarget.equals(lastPosition)) {
-                continue;
-            }
-
-            // Check for clutter by ensuring the target is not too close to other allies
-            boolean isCluttered = false;
-            for (RobotInfo ally : nearbyAllies) {
-                if (prioritizedTarget.distanceSquaredTo(ally.getLocation()) < 4) {  // Adjust spacing threshold as needed
-                    isCluttered = true;
-                    break;
-                }
-            }
-
-            // Move if the target location is valid and not cluttered
-            if (!isCluttered && rc.canMove(prioritizedDirection)) {
-                rc.move(prioritizedDirection);
-                didMove = true;
-                lastPosition = currentPosition;  // Update last position after a successful move
-                break;
-            }
-        }
-
-        return didMove;
-    }
-
-
 
     /**
      * Collect nearby crumbs.
