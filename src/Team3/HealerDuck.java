@@ -5,7 +5,7 @@ import battlecode.common.*;
 import java.util.Arrays;
 import java.util.Comparator;
 
-public class HealerDuck extends Duck {
+public final class HealerDuck extends Duck {
 
     //total health is 1000 and healing to be done when life drops below 900.
     private static final int MAX_HEALTH_THRESHOLD = 900;
@@ -34,18 +34,24 @@ public class HealerDuck extends Duck {
     }
 
     @Override
-    public void play() throws GameActionException {
-        RobotController rc = getRobotController();
-        super.setupPlay();
-        MapLocation ml = rc.getLocation();
-        if (!heal_ally()) {  // Try to heal first, and only proceed if no healing was done
-            lookForFlag();
-            exploreAround();
-            attack();
-            move();
+    public boolean play() throws GameActionException {
+        boolean playedSuccessfully = false;
+        try {
+            RobotController rc = getRobotController();
+            super.setupPlay();
+            MapLocation ml = rc.getLocation();
+            if (!heal_ally()) {  // Try to heal first, and only proceed if no healing was done
+                lookForFlag();
+                exploreAround();
+                attack();
+                move();
+            }
+            playedSuccessfully = true;
+        } catch (GameActionException e) {
         }
-
+        return playedSuccessfully;
     }
+
     private RobotInfo healTarget(MapLocation c,int r) throws GameActionException {
         RobotController rc = getRobotController();
         RobotInfo target = null;

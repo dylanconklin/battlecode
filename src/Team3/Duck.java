@@ -1,6 +1,8 @@
 package Team3;
 
 import battlecode.common.*;
+import battlecode.world.Trap;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,18 +13,6 @@ import java.util.Random;
  */
 public class Duck {
     /**
-     * The robot controller.
-     */
-    private RobotController rc;
-    /**
-     * Duck skill type.
-     */
-    private SkillType skill;
-    /**
-     * Random number generator.
-     */
-    private static final Random RNG = new Random();
-    /**
      * The chosen health threshold.
      */
     public static final int HEALTH_THRESHOLD = 300;
@@ -30,9 +20,22 @@ public class Duck {
      * Thirty seven. No idea why this number.
      */
     public static final int THIRTYSEVEN = 37;
+    /**
+     * Random number generator.
+     */
+    private static final Random RNG = new Random();
+    /**
+     * The robot controller.
+     */
+    private final RobotController rc;
+    /**
+     * Duck skill type.
+     */
+    private final SkillType skill;
 
     /**
      * Duck constructer.
+     *
      * @param controller
      * @param duckSkill
      */
@@ -42,7 +45,35 @@ public class Duck {
     }
 
     /**
+     * Get a randomized list of Directions.
+     *
+     * @return An ArrayList of Directions
+     */
+    public static ArrayList<Direction> randomDirections() {
+        ArrayList<Direction> directions = new ArrayList<Direction>(
+                Arrays.asList(Direction.allDirections()));
+        directions.remove(Direction.CENTER);
+        Collections.shuffle(directions);
+        directions.add(Direction.CENTER);
+        return directions;
+    }
+
+    static ArrayList<Direction> directions() {
+        ArrayList<Direction> directions = new ArrayList<>(
+                Arrays.asList(Direction.values()));
+        directions.remove(Direction.CENTER);
+        return directions;
+    }
+
+    static ArrayList<TrapType> trapTypes() {
+        ArrayList<TrapType> trapTypes = new ArrayList<>(
+                Arrays.asList(TrapType.EXPLOSIVE, TrapType.STUN, TrapType.WATER, TrapType.NONE));
+        return trapTypes;
+    }
+
+    /**
      * Getter for RobotController.
+     *
      * @return This Duck's RobotController
      */
     RobotController getRobotController() {
@@ -51,6 +82,7 @@ public class Duck {
 
     /**
      * Getter for skill.
+     *
      * @return This Duck's Skill
      */
     SkillType getSkill() {
@@ -59,6 +91,7 @@ public class Duck {
 
     /**
      * Update the number of enemies on the board.
+     *
      * @return the number of enemies on the board
      * @throws GameActionException
      */
@@ -76,6 +109,7 @@ public class Duck {
 
     /**
      * Update the count of enemies.
+     *
      * @param enemyRobots
      * @return number of enemies
      * @throws GameActionException
@@ -92,6 +126,7 @@ public class Duck {
 
     /**
      * Make sure Duck is spawned.
+     *
      * @return True if Duck is spawned, False otherwise
      * @throws GameActionException
      */
@@ -104,37 +139,46 @@ public class Duck {
 
     /**
      * Decider for what move to make.
+     *
+     * @return True if Duck finished a turn successfully, False otherwise
      * @throws GameActionException
      */
-    public void play() throws GameActionException {
-        lookForFlag();
+    public boolean play() throws GameActionException {
+        boolean playedSuccessfully = false;
+        try {
+            lookForFlag();
 
-        while (rc.hasFlag() && rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
-            moveToward(allySpawnZoneDirection());
-        }
-        // Move and attack randomly if no objective.
-        Direction dir = RobotPlayer.DIRECTIONS[RobotPlayer.RNG.nextInt(
-                RobotPlayer.DIRECTIONS.length)];
-        MapLocation nextLoc = rc.getLocation().add(dir);
-        if (rc.canMove(dir)) {
-            rc.move(dir);
-        } else if (rc.canAttack(nextLoc)) {
-            rc.attack(nextLoc);
-        }
+            while (rc.hasFlag() && rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
+                moveToward(allySpawnZoneDirection());
+            }
+            // Move and attack randomly if no objective.
+            Direction dir = RobotPlayer.DIRECTIONS[
+                    RobotPlayer.RNG.nextInt(RobotPlayer.DIRECTIONS.length)];
+            MapLocation nextLoc = rc.getLocation().add(dir);
+            if (rc.canMove(dir)) {
+                rc.move(dir);
+            } else if (rc.canAttack(nextLoc)) {
+                rc.attack(nextLoc);
+            }
 
-        // Rarely attempt placing traps behind the robot.
-        MapLocation prevLoc = rc.getLocation().subtract(dir);
-        if (rc.canBuild(TrapType.EXPLOSIVE, prevLoc)
-                && RobotPlayer.RNG.nextInt() % THIRTYSEVEN == 1) {
-            rc.build(TrapType.EXPLOSIVE, prevLoc);
+            // Rarely attempt placing traps behind the robot.
+            MapLocation prevLoc = rc.getLocation().subtract(dir);
+            if (rc.canBuild(TrapType.EXPLOSIVE, prevLoc)
+                    && RobotPlayer.RNG.nextInt() % THIRTYSEVEN == 1) {
+                rc.build(TrapType.EXPLOSIVE, prevLoc);
+            }
+            // We can also move our code into different methods or classes
+            // to better organize it!
+            updateEnemyRobots();
+            playedSuccessfully = true;
+        } catch (GameActionException e) {
         }
-        // We can also move our code into different methods or classes
-        // to better organize it!
-        updateEnemyRobots();
+        return playedSuccessfully;
     }
 
     /**
      * Look for nearby flags.
+     *
      * @return True if Duck picked up flag, False otherwise
      * @throws GameActionException
      */
@@ -153,6 +197,7 @@ public class Duck {
 
     /**
      * Move away from Direction.
+     *
      * @param location
      * @return True if Duck moved, False otherwise
      * @throws GameActionException
@@ -164,18 +209,8 @@ public class Duck {
     }
 
     /**
-     * Get a randomized list of Directions.
-     * @return An ArrayList of Directions
-     */
-    public static ArrayList<Direction> randomDirections() {
-        ArrayList<Direction> directions = new ArrayList<Direction>(
-                Arrays.asList(Direction.allDirections()));
-        Collections.shuffle(directions);
-        return directions;
-    }
-
-    /**
      * Move in a random direction.
+     *
      * @return True if Duck moved, False otherwise
      * @throws GameActionException
      */
@@ -232,6 +267,7 @@ public class Duck {
 
     /**
      * Get direction toward ally spawn zone.
+     *
      * @return Direction toward ally spawn zone
      */
     public Direction allySpawnZoneDirection() {
@@ -243,6 +279,7 @@ public class Duck {
 
     /**
      * Get direction toward enemy spawn zone.
+     *
      * @return Direction toward enemy spawn zone
      */
     public Direction enemySpawnZoneDirection() {
@@ -251,6 +288,7 @@ public class Duck {
 
     /**
      * Move toward ideal location.
+     *
      * @param location
      * @return True if Duck moved, False otherwise
      * @throws GameActionException
@@ -263,6 +301,7 @@ public class Duck {
 
     /**
      * Move toward ideal direction.
+     *
      * @param direction
      * @return True if Duck moved, False otherwise
      * @throws GameActionException
@@ -326,12 +365,13 @@ public class Duck {
 
     /**
      * Collect nearby crumbs.
+     *
      * @return True if Duck moved, False otherwise
      * @throws GameActionException
      */
     public boolean collectCrumbs() throws GameActionException {
-        MapLocation[] crumbLocations = rc.senseNearbyCrumbs(
-                GameConstants.VISION_RADIUS_SQUARED);
+        MapLocation[] crumbLocations =
+                rc.senseNearbyCrumbs(GameConstants.VISION_RADIUS_SQUARED);
         boolean didMove = false;
         if (crumbLocations.length > 0) {
             didMove = moveToward(crumbLocations[0]);
@@ -339,20 +379,6 @@ public class Duck {
             didMove = moveInRandomDirection();
         }
         return didMove;
-    }
-
-    static ArrayList<Direction> directions() {
-        ArrayList<Direction> directions = new ArrayList<>(
-                Arrays.asList(Direction.values()));
-        directions.remove(Direction.CENTER);
-        return directions;
-    }
-
-    static ArrayList<TrapType> trapTypes() {
-        ArrayList<TrapType> trapTypes = new ArrayList<>(
-                Arrays.asList(TrapType.values()));
-        trapTypes.remove(TrapType.NONE);
-        return trapTypes;
     }
 
     // This returns an array of all possible directions in order of priority
