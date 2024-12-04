@@ -72,7 +72,7 @@ public final class HealerDuck extends Duck {
      * @return Top priority Duck, null otherwise
      * @throws GameActionException
      */
-    private RobotInfo healTarget()
+    public RobotInfo healTarget()
             throws GameActionException {
         RobotController rc = getRobotController();
         RobotInfo target = null;

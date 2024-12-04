@@ -42,7 +42,9 @@ public final class RobotPlayer {
         while (!rc.isSpawned()) {
             MapLocation[] spawnLocs = rc.getAllySpawnLocations();
             // Pick a random spawn location to attempt spawning in.
+            if(spawnLocs == null) {return null;}
             MapLocation randomLoc = spawnLocs[RNG.nextInt(spawnLocs.length)];
+            if(randomLoc == null) {return null;}
             if (rc.canSpawn(randomLoc)) {
                 rc.spawn(randomLoc);
             }
