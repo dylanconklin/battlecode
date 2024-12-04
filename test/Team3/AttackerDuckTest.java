@@ -27,18 +27,25 @@ class AttackerDuckTest {
         locations[0] = new MapLocation(1, 1);
         locations[1] = new MapLocation(2, 2);
         locations[2] = new MapLocation(3, 3);
-        //Direction dir = RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
-        //when(rc.getTeam()).thenReturn(Team.valueOf("Team"));
         when(rc.senseNearbyRobots(-1)).thenReturn(allNearby);
         when(rc.senseNearbyCrumbs(-1)).thenReturn(locations);
-        //when(rc.getTeam()).thenReturn(Team.valueOf("Team3"));
-//         int test = attackerDuck.attack();
-
         assertEquals(1, 1);
     }
-
     @Test
-    public void test2() {
-        assertEquals(1, 1);
+    public void testAttackFail() throws GameActionException {
+        RobotInfo enemy = mock(RobotInfo.class);
+        MapLocation enemyLocation = new MapLocation(7, 7);
+
+        when(enemy.getTeam()).thenReturn(Team.B);
+        when(enemy.getLocation()).thenReturn(enemyLocation);
+        when(rc.senseNearbyRobots()).thenReturn(new RobotInfo[]{enemy});
+        when(rc.canAttack(enemyLocation)).thenReturn(true);
+        doNothing().when(rc).attack(enemyLocation);
+
+        boolean didAttack = attackerDuck.attack();
+
+        assertFalse(didAttack, "AttackerDuck should attack an enemy robot");
+
     }
+
 }

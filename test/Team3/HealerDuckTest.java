@@ -1,49 +1,62 @@
-//package Team3;
-//import static org.junit.jupiter.api.Assertions.*;
-//import static org.mockito.Mockito.*;
-//
-//import Team3.Duck;
-//import Team3.AttackerDuck;
-//import Team3.HealerDuck;
-//import battlecode.common.*;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.mockito.Mockito;
-//
-//import java.lang.reflect.Type;
-//import java.util.ArrayList;
-//
-//
-//public class HealerDuckTest {
-//    private HealerDuck healerDuck;
-//    private RobotController rc;
-//
-//    @BeforeEach
-//    public void setUp() throws GameActionException {
-//        rc = mock(RobotController.class);
-//        healerDuck = new HealerDuck(rc);
-//    }
-//
-//    @Test
-//    void testHealerExploreAround() throws GameActionException {
-//        // Create an array of MapLocation with a size of 3
-//        MapLocation[] locations = new MapLocation[3];
-//        locations[0] = new MapLocation(1, 1);
-//        locations[1] = new MapLocation(2, 2);
-//        locations[2] = new MapLocation(3, 3);
-//        Direction dir = RobotPlayer.DIRECTIONS[RobotPlayer.RNG.nextInt(RobotPlayer.DIRECTIONS.length)];
-//        //when(rc.getTeam()).thenReturn(Team.valueOf("Team"));
-//        when(rc.senseNearbyCrumbs(-1)).thenReturn(locations);
-//        when(rc.getLocation()).thenReturn(locations[0]);
-//        when(healerDuck.moveToward(dir)).thenReturn(true);
-//        when(rc.canFill(locations[0])).thenReturn(true);
-//        int a = healerDuck.exploreAround();
-//        assertEquals(1, a);
-//    }
-//    @Test
-//    void testHeal() throws GameActionException {
-//        boolean a= healerDuck.heal_ally();
-//        RobotController mockedRc = Mockito.mock(RobotController.class);
-//        assertFalse(a);
-//    }
-//}
+package Team3;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import Team3.Duck;
+import Team3.AttackerDuck;
+import Team3.HealerDuck;
+import battlecode.common.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+
+
+public class HealerDuckTest {
+    private HealerDuck healerDuck;
+    private RobotController rc;
+
+    @BeforeEach
+    public void setUp() throws GameActionException {
+        rc = mock(RobotController.class);
+        when(rc.getTeam()).thenReturn(Team.A); // Mock a valid team
+        when(rc.getTeam().opponent()).thenReturn(Team.B); // Mock the opponent team
+        healerDuck = new HealerDuck(rc);
+    }
+    @Test
+    void testExploreAround() throws GameActionException {
+        MapLocation currentLocation = new MapLocation(5, 5);
+        MapLocation crumbLocation = new MapLocation(6, 6);
+        MapLocation[] crumbs = { crumbLocation };
+
+        when(rc.getLocation()).thenReturn(currentLocation);
+        when(rc.senseNearbyCrumbs(-1)).thenReturn(crumbs);
+        doNothing().when(rc).move(currentLocation.directionTo(crumbLocation));
+
+        int foundCrumbs = healerDuck.exploreAround();
+
+        assertEquals(1, foundCrumbs, "HealerDuck should find and move towards crumbs");
+//        verify(rc, times(1)).move(currentLocation.directionTo(crumbLocation));
+    }
+
+    @Test
+    void testAttack() throws GameActionException {
+        RobotInfo enemy = mock(RobotInfo.class, withSettings().lenient());
+        MapLocation enemyLocation = new MapLocation(7, 7);
+        //when(enemy.getTeam()).thenReturn(rc.getTeam().opponent());
+        when(enemy.getLocation()).thenReturn(enemyLocation);
+
+        when(rc.senseNearbyRobots(GameConstants.VISION_RADIUS_SQUARED, rc.getTeam().opponent())).thenReturn(new RobotInfo[]{enemy});
+        when(rc.canAttack(enemyLocation)).thenReturn(true);
+        doNothing().when(rc).attack(enemyLocation);
+
+        int attackedRobots = healerDuck.attack();
+
+        assertEquals(1, attackedRobots, "HealerDuck should attack one enemy robot");
+//        verify(rc, times(1)).attack(enemyLocation);
+    }
+
+
+}
