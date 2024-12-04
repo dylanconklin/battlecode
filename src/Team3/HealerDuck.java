@@ -5,22 +5,38 @@ import battlecode.common.*;
 import java.util.Arrays;
 import java.util.Comparator;
 
+/**
+ * The HealerDuck class extends the Duck class and provides healing functionality to nearby allies.
+ * This class implements logic for healing, moving, and attacking during gameplay.
+ */
 public final class HealerDuck extends Duck {
 
-    //total health is 1000 and healing to be done when life drops below 900.
+    /** The health threshold below which healing should be prioritized. */
     private static final int MAX_HEALTH_THRESHOLD = 900;
 
+    /** The team this robot belongs to. */
     private Team myTeam = null;
+
     private Team opTeam = null;
 
+    /**
+     * Constructor for HealerDuck.
+     *
+     * @param rc The RobotController instance for the robot.
+     */
     public HealerDuck(RobotController rc) {
         super(rc, SkillType.HEAL);
         myTeam = rc.getTeam();
         opTeam = rc.getTeam().opponent();
     }
 
-    // this method will return true / false based on the fact if it is healing or not. this return can be utilized
 
+    /**
+     * Explores nearby areas and collects crumbs if present.
+     *
+     * @return The number of crumbs found and collected.
+     * @throws GameActionException if an error occurs during exploration.
+     */
     public int exploreAround() throws GameActionException {
         RobotController rc = getRobotController();
         int found_crumbs = 0 ;
@@ -33,6 +49,12 @@ public final class HealerDuck extends Duck {
         return found_crumbs;
     }
 
+    /**
+     * Executes the main behavior of the HealerDuck, including healing, moving, and attacking.
+     *
+     * @return True if the behavior was executed successfully, false otherwise.
+     * @throws GameActionException if an error occurs during gameplay.
+     */
     @Override
     public boolean play() throws GameActionException {
         boolean playedSuccessfully = false;
@@ -52,6 +74,14 @@ public final class HealerDuck extends Duck {
         return playedSuccessfully;
     }
 
+    /**
+     * Finds the most appropriate target for healing based on priority and health level.
+     *
+     * @param c The center location to search for heal targets.
+     * @param r The radius within which to search for heal targets.
+     * @return The RobotInfo of the best target to heal, or null if no target is found.
+     * @throws GameActionException if an error occurs during sensing.
+     */
     private RobotInfo healTarget(MapLocation c,int r) throws GameActionException {
         RobotController rc = getRobotController();
         RobotInfo target = null;
@@ -79,6 +109,12 @@ public final class HealerDuck extends Duck {
         return target;
     }
 
+    /**
+     * Attempts to heal a nearby ally.
+     *
+     * @return True if healing was performed, false otherwise.
+     * @throws GameActionException if an error occurs during healing.
+     */
     public boolean heal_ally() throws GameActionException {
         RobotController rc = getRobotController();
         // heal () is only done if no opponent in vision_radius.
@@ -118,14 +154,14 @@ public final class HealerDuck extends Duck {
         }
         if (bestDirection != null) {
             if (bestDirection != Direction.CENTER) {
-                System.out.println("heal move " + bestDirection);
+
                 rc.move(bestDirection);
             }
 
             if (rc.canHeal(bestTarget.location)) {
                 int a_heal_lvl = bestTarget.getHealth();
                 rc.heal(bestTarget.location);
-                System.out.println("healing from: "+a_heal_lvl +" : "+bestTarget.getHealth());
+
                 rc.getExperience(getSkill());
                 didHeal = true;
             }
@@ -135,9 +171,19 @@ public final class HealerDuck extends Duck {
         return didHeal;
     }
 
+
+    /**
+     * Handles movement logic for the HealerDuck, prioritizing healing targets and objectives.
+     *
+     * @throws GameActionException if an error occurs during movement.
+     */
+
     public void move() throws GameActionException {
         RobotController rc = getRobotController();
-        RobotInfo[] ducksToHeal = Arrays.stream(rc.senseNearbyRobots()).filter(robot -> robot.getTeam() == rc.getTeam() && robot.getHealth() <= 300).sorted(Comparator.comparing(r -> r.getHealth())).toArray(RobotInfo[]::new);
+        RobotInfo[] ducksToHeal = Arrays.stream(rc.senseNearbyRobots())
+                .filter(robot -> robot.getTeam() == rc.getTeam() && robot.getHealth() <= 300)
+                .sorted(Comparator.comparing(r -> r.getHealth()))
+                .toArray(RobotInfo[]::new);
         if (ducksToHeal.length > 0) {
             moveToward(ducksToHeal[0].getLocation());
         } else if (rc.hasFlag()) {
@@ -148,6 +194,13 @@ public final class HealerDuck extends Duck {
             moveInRandomDirection();
         }
     }
+
+    /**
+     * Handles the attacking behavior of the HealerDuck, targeting enemies in range.
+     *
+     * @return The number of enemy robots attacked.
+     * @throws GameActionException if an error occurs during attack.
+     */
     public int attack() throws GameActionException {
         RobotController rc = getRobotController();
         RobotInfo[] robotInfos = rc.senseNearbyRobots(GameConstants.VISION_RADIUS_SQUARED,opTeam);
