@@ -154,14 +154,14 @@ public final class HealerDuck extends Duck {
         }
         if (bestDirection != null) {
             if (bestDirection != Direction.CENTER) {
-                System.out.println("heal move " + bestDirection);
+
                 rc.move(bestDirection);
             }
 
             if (rc.canHeal(bestTarget.location)) {
                 int a_heal_lvl = bestTarget.getHealth();
                 rc.heal(bestTarget.location);
-                System.out.println("healing from: "+a_heal_lvl +" : "+bestTarget.getHealth());
+
                 rc.getExperience(getSkill());
                 didHeal = true;
             }
