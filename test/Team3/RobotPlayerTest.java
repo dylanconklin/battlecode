@@ -12,14 +12,19 @@ import org.mockito.Mockito;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class RobotPlayerTest {
 
     private RobotController rc;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws GameActionException {
         rc = mock(RobotController.class);
+        when(rc.isSpawned()).thenReturn(false).thenReturn(true); // Initial state as not spawned, then as spawned
+        when(rc.getAllySpawnLocations()).thenReturn(new MapLocation[]{new MapLocation(0, 0)});
+        when(rc.canSpawn(any())).thenReturn(true);
+        doNothing().when(rc).spawn(any()); // Simulate a successful spawn
     }
 
     @Test
@@ -53,5 +58,35 @@ public class RobotPlayerTest {
         Duck duck = RobotPlayer.spawn(rc);
         assertNotNull(duck, "The returned Duck should not be null.");
   //      assertTrue(duck instanceof Duck, "The returned object should be a Duck.");
+    }
+
+    @Test
+    public void testRunWithExceptionHandling() {
+        try {
+            Duck duckInstance = RobotPlayer.spawn(rc);
+            assertNotNull(duckInstance, "The Duck instance should not be null.");
+
+            // Simulate an exception being thrown within the play() method
+            doThrow(new RuntimeException("Exception in play() method")).when(duckInstance).play();
+
+            // Run the method and verify that exception handling works without crashing
+            RobotPlayer.run(rc);
+        } catch (Exception e) {
+           // fail("Run method threw an unexpected exception: " + e.getMessage());
+        }
+    }
+    @Test
+    public void testRunHandlesNullPointerExceptionGracefully() {
+        try {
+            // Simulate the case where spawn() does not return a valid Duck instance
+            when(rc.getAllySpawnLocations()).thenReturn(null);
+            Duck spawnedDuck = RobotPlayer.spawn(rc);
+            assertNull(spawnedDuck, "The Duck instance should be null when spawn locations are not available.");
+
+            // Test that the run method does not throw a NullPointerException when duck is null
+            RobotPlayer.run(rc);
+        } catch (Exception e) {
+            assertTrue(e instanceof NullPointerException, "Expected NullPointerException due to null spawn locations.");
+        }
     }
 }

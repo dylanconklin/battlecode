@@ -89,6 +89,7 @@ public final class HealerDuck extends Duck {
         int maxPriority = Integer.MIN_VALUE;
 
         RobotInfo[] robots = rc.senseNearbyRobots(c, r, myTeam);
+        if (robots == null  ) return null;
         for (int i = robots.length; --i >= 0; ) {
             RobotInfo robot = robots[i];
             if (robot.health == GameConstants.DEFAULT_HEALTH) {

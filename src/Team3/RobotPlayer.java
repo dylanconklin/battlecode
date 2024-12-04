@@ -13,7 +13,7 @@ public final class RobotPlayer {
     /**
      * Random number generator.
      */
-    static final Random RNG = new Random(6147);
+    static Random RNG = new Random(6147);
     /**
      * Array containing all the possible movement directions.
      */
