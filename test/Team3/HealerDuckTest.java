@@ -17,17 +17,19 @@ import java.util.ArrayList;
 public class HealerDuckTest {
     private HealerDuck healerDuck;
     private RobotController rc;
+    private Duck duck;
     private RobotInfo mockTarget;
     @BeforeEach
     public void setUp() throws GameActionException {
         rc = mock(RobotController.class);
         when(rc.getTeam()).thenReturn(Team.A); // Mock a valid team
         when(rc.getTeam().opponent()).thenReturn(Team.B); // Mock the opponent team
-
+        duck = new Duck(rc, SkillType.ATTACK);
         healerDuck = new HealerDuck(rc);
         mockTarget = mock(RobotInfo.class);
         when(mockTarget.getLocation()).thenReturn(new MapLocation(0, 0));
     }
+
     @Test
     void testAttack() throws GameActionException {
         RobotInfo enemy = mock(RobotInfo.class, withSettings().lenient());

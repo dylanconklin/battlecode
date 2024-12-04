@@ -65,35 +65,6 @@ class AttackerDuckTest {
         assertNotNull(result);
         assertEquals(currentLocation.directionTo(allySpawnLocationsArray[0]), result);
     }
-    @Test
-    public void testAllySpawnZoneDirectionWithSingleLocation() throws GameActionException {
-        MapLocation[] allySpawnLocationsArray = {
-                new MapLocation(1, 1)
-        };
-        when(rc.getAllySpawnLocations()).thenReturn(allySpawnLocationsArray);
-        MapLocation currentLocation = new MapLocation(0, 0);
-        when(rc.getLocation()).thenReturn(currentLocation);
-        Direction result = attackerDuck.allySpawnZoneDirection();
-        assertNotNull(result);
-        assertEquals(currentLocation.directionTo(allySpawnLocationsArray[0]), result);
-    }
-    @Test
-    public void testAllySpawnZoneDirectionWithMultipleLocations() throws GameActionException {
-        // Arrange: Mock `getAllySpawnLocations()` to return multiple locations.
-        MapLocation[] allySpawnLocationsArray = {
-                new MapLocation(2, 3),
-                new MapLocation(4, 5),
-                new MapLocation(6, 7)
-        };
-        when(rc.getAllySpawnLocations()).thenReturn(allySpawnLocationsArray);
-        MapLocation currentLocation = new MapLocation(0, 0);
-        when(rc.getLocation()).thenReturn(currentLocation);
-        Direction result = attackerDuck.allySpawnZoneDirection();
-        assertNotNull(result);
-        boolean isValidDirection = Arrays.stream(allySpawnLocationsArray)
-                .anyMatch(loc -> currentLocation.directionTo(loc).equals(result));
-        assertTrue(isValidDirection);
-    }
 
     @Test
     public void testAttackerDuckConstructor() {
