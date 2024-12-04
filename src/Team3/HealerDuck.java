@@ -4,7 +4,6 @@ import battlecode.common.*;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.stream.Collectors;
 
 public final class HealerDuck extends Duck {
 
@@ -44,7 +43,7 @@ public final class HealerDuck extends Duck {
     }
 
     /**
-     * Play logic for HealerDuck
+     * Play logic for HealerDuck.
      * @return True if played successfully, False otherwise
      * @throws GameActionException
      */
@@ -70,12 +69,10 @@ public final class HealerDuck extends Duck {
 
     /**
      * Get most important Duck to heal.
-     * @param c
-     * @param r
      * @return Top priority Duck, null otherwise
      * @throws GameActionException
      */
-    private RobotInfo healTarget(final MapLocation c, final int r)
+    private RobotInfo healTarget()
             throws GameActionException {
         RobotController rc = getRobotController();
         RobotInfo target = null;
@@ -84,8 +81,10 @@ public final class HealerDuck extends Duck {
 
         try {
             target = Arrays
-                    .stream(rc.senseNearbyRobots(c, r, rc.getTeam()))
-                    .filter(robot -> robot.health != GameConstants.DEFAULT_HEALTH)
+                    .stream(rc.senseNearbyRobots())
+                    .filter(bot -> bot.getTeam() == rc.getTeam())
+                    .filter(bot -> rc.canHeal(bot.location))
+                    .filter(bot -> bot.health != GameConstants.DEFAULT_HEALTH)
                     .sorted(Comparator.comparing(
                             robot -> robot.attackLevel
                                     + robot.healLevel
@@ -97,56 +96,23 @@ public final class HealerDuck extends Duck {
         return target;
     }
 
+    /**
+     * Healing logic for HealerDuck.
+     * @return True if HealerDuck healed, False otherwise
+     * @throws GameActionException
+     */
     public boolean healAlly() throws GameActionException {
         RobotController rc = getRobotController();
-        // heal () is only done if no opponent in vision_radius.
-        if (!rc.isActionReady() || rc.senseNearbyRobots(GameConstants.VISION_RADIUS_SQUARED, rc.getTeam().opponent()).length > 0) {
-            return false;
-        }
         boolean didHeal = false;
-        int maxScore = Integer.MIN_VALUE;
-        // sensing all the robots near in its vision to heal. it will heal only the ally robots.
-        Direction bestDirection = null;
-        RobotInfo bestTarget = null;
-        MapLocation ml = rc.getLocation();
-        Direction[] allDirections = Direction.values();
-        for (int i = allDirections.length; --i >= 0;) {
-            Direction direction = allDirections[i];
-            if (direction != Direction.CENTER && !rc.canMove(direction)) {
-                continue;
-            }
-
-            MapLocation newLocation = rc.adjacentLocation(direction);
-            RobotInfo newTarget = healTarget(newLocation, GameConstants.HEAL_RADIUS_SQUARED);
-            if (newTarget == null) {
-                continue;
-            }
-
-
-            int score = newTarget.attackLevel + newTarget.healLevel + newTarget.buildLevel;
-            if (newTarget.hasFlag) {
-                score += ONE_THOUSAND;
-            }
-
-            if (score > maxScore) {
-                bestDirection = direction;
-                bestTarget = newTarget;
-                maxScore = score;
-            }
-        }
-        if (bestDirection != null) {
-            if (bestDirection != Direction.CENTER) {
-                System.out.println("heal move " + bestDirection);
-                rc.move(bestDirection);
-            }
-
-            if (rc.canHeal(bestTarget.location)) {
-                int aHealLvl = bestTarget.getHealth();
-                rc.heal(bestTarget.location);
-                System.out.println("healing from: " + aHealLvl + " : " + bestTarget.getHealth());
-                rc.getExperience(getSkill());
-                didHeal = true;
-            }
+        RobotInfo target = healTarget();
+        // heal () is only done if no opponent in vision_radius.
+        if (target != null
+                || rc.senseNearbyRobots(
+                GameConstants.VISION_RADIUS_SQUARED,
+                rc.getTeam().opponent()
+        ).length == 0) {
+            rc.heal(target.location);
+            didHeal = true;
         }
 
         return didHeal;
