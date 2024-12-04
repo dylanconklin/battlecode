@@ -188,6 +188,7 @@ public class Duck {
     public boolean lookForFlag() throws GameActionException {
         boolean pickedUpFlag = false;
         FlagInfo[] flags = rc.senseNearbyFlags(-1, rc.getTeam());
+        if(flags == null) return pickedUpFlag;
         for (FlagInfo flag : flags) {
             if (rc.canPickupFlag(flag.getLocation())) {
                 pickedUpFlag = true;
@@ -236,6 +237,7 @@ public class Duck {
     public Direction allySpawnZoneDirection() {
         ArrayList<MapLocation> allySpawnLocations = new ArrayList<MapLocation>(
                 Arrays.asList(rc.getAllySpawnLocations()));
+
         Collections.shuffle(allySpawnLocations);
         return rc.getLocation().directionTo(allySpawnLocations.get(0));
     }

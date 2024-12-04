@@ -9,15 +9,19 @@ import battlecode.common.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
+import java.util.Arrays;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 class AttackerDuckTest {
     private AttackerDuck attackerDuck;
     private RobotController rc;
-
+    private Duck duck;
     @BeforeEach
     public void setUp() {
         rc = mock(RobotController.class);
         attackerDuck = new AttackerDuck(rc);
+        duck = new Duck(rc, SkillType.ATTACK);
     }
 
     @Test
@@ -41,11 +45,61 @@ class AttackerDuckTest {
         when(rc.senseNearbyRobots()).thenReturn(new RobotInfo[]{enemy});
         when(rc.canAttack(enemyLocation)).thenReturn(true);
         doNothing().when(rc).attack(enemyLocation);
-
         boolean didAttack = attackerDuck.attack();
+        assertFalse(didAttack);
 
-        assertFalse(didAttack, "AttackerDuck should attack an enemy robot");
+    }
+    @Test
+    public void testAllySpawnZoneDirectionWithValidLocations() throws GameActionException {
+        MapLocation[] allySpawnLocationsArray = {
+                new MapLocation(1, 1),
+                new MapLocation(2, 2),
+                new MapLocation(3, 3)
+        };
+        when(rc.getAllySpawnLocations()).thenReturn(allySpawnLocationsArray);
 
+        MapLocation currentLocation = new MapLocation(0, 0);
+        when(rc.getLocation()).thenReturn(currentLocation);
+
+        Direction result = attackerDuck.allySpawnZoneDirection();
+        assertNotNull(result);
+        assertEquals(currentLocation.directionTo(allySpawnLocationsArray[0]), result);
+    }
+    @Test
+    public void testAllySpawnZoneDirectionWithSingleLocation() throws GameActionException {
+        MapLocation[] allySpawnLocationsArray = {
+                new MapLocation(1, 1)
+        };
+        when(rc.getAllySpawnLocations()).thenReturn(allySpawnLocationsArray);
+        MapLocation currentLocation = new MapLocation(0, 0);
+        when(rc.getLocation()).thenReturn(currentLocation);
+        Direction result = attackerDuck.allySpawnZoneDirection();
+        assertNotNull(result);
+        assertEquals(currentLocation.directionTo(allySpawnLocationsArray[0]), result);
+    }
+    @Test
+    public void testAllySpawnZoneDirectionWithMultipleLocations() throws GameActionException {
+        // Arrange: Mock `getAllySpawnLocations()` to return multiple locations.
+        MapLocation[] allySpawnLocationsArray = {
+                new MapLocation(2, 3),
+                new MapLocation(4, 5),
+                new MapLocation(6, 7)
+        };
+        when(rc.getAllySpawnLocations()).thenReturn(allySpawnLocationsArray);
+        MapLocation currentLocation = new MapLocation(0, 0);
+        when(rc.getLocation()).thenReturn(currentLocation);
+        Direction result = attackerDuck.allySpawnZoneDirection();
+        assertNotNull(result);
+        boolean isValidDirection = Arrays.stream(allySpawnLocationsArray)
+                .anyMatch(loc -> currentLocation.directionTo(loc).equals(result));
+        assertTrue(isValidDirection);
+    }
+
+    @Test
+    public void testAttackerDuckConstructor() {
+        RobotController mockRC = mock(RobotController.class);
+        AttackerDuck attackerDuck = new AttackerDuck(mockRC);
+        assertNotNull(attackerDuck);
     }
 
 }
