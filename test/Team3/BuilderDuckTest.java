@@ -1,4 +1,5 @@
 package Team3;
+import static Team3.BuilderDuck.FOUR;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -23,15 +24,7 @@ class BuilderDuckTest {
         rc = mock(RobotController.class);
         builderDuck = new BuilderDuck(rc);
     }
-    //    @Test
-//    void testCollectCrumbs() throws GameActionException {
-//        MapLocation[] locations = new MapLocation[3];
-//        locations[0] = new MapLocation(1, 1);
-//        locations[1] = new MapLocation(2, 2);
-//        locations[2] = new MapLocation(3, 3);
-//        when(rc.senseNearbyCrumbs(-1)).thenReturn(locations);
-//        builderDuck.collectCrumbs();
-//    }
+
     @Test
     void testDefendFlagNoFlag() throws GameActionException {
         FlagInfo flag = new FlagInfo(new MapLocation(3, 3), Team.A, true,12);
@@ -67,5 +60,4 @@ class BuilderDuckTest {
         when(rc.canFill(any(MapLocation.class))).thenReturn(false);
         assertFalse(builderDuck.handleWaterObstacles());
     }
-
 }

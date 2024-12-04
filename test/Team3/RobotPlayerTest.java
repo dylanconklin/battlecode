@@ -24,7 +24,7 @@ public class RobotPlayerTest {
         when(rc.isSpawned()).thenReturn(false).thenReturn(true);
         when(rc.getAllySpawnLocations()).thenReturn(new MapLocation[]{new MapLocation(0, 0)});
         when(rc.canSpawn(any())).thenReturn(true);
-        doNothing().when(rc).spawn(any()); // Simulate a successful spawn
+        doNothing().when(rc).spawn(any());
     }
 
     @Test
@@ -71,7 +71,7 @@ public class RobotPlayerTest {
             assertNull(spawnedDuck);
             RobotPlayer.run(rc);
         } catch (Exception e) {
-            assertTrue(e instanceof NullPointerException, "Expected NullPointerException due to null spawn locations.");
+            assertTrue(e instanceof NullPointerException);
         }
     }
 }

@@ -73,5 +73,16 @@ public void testHealAllyNoTarget() throws GameActionException {
         assertNotNull(result);
         assertEquals(currentLocation.directionTo(allySpawnLocationsArray[0]), result);
     }
+    @Test
+    void testExploreAround() throws GameActionException {
+        MapLocation currentLocation = new MapLocation(5, 5);
+        MapLocation crumbLocation = new MapLocation(6, 6);
+        MapLocation[] crumbs = { crumbLocation };
 
+        when(rc.getLocation()).thenReturn(currentLocation);
+        when(rc.senseNearbyCrumbs(-1)).thenReturn(crumbs);
+        doNothing().when(rc).move(currentLocation.directionTo(crumbLocation));
+        boolean foundCrumbs = healerDuck.exploreAround();
+        assertEquals(true, foundCrumbs);
+    }
 }
