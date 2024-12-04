@@ -1,7 +1,6 @@
 package Team3;
 
 import battlecode.common.*;
-import battlecode.world.Trap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,7 +66,10 @@ public class Duck {
 
     static ArrayList<TrapType> trapTypes() {
         ArrayList<TrapType> trapTypes = new ArrayList<>(
-                Arrays.asList(TrapType.EXPLOSIVE, TrapType.STUN, TrapType.WATER, TrapType.NONE));
+                Arrays.asList(TrapType.EXPLOSIVE,
+                        TrapType.STUN,
+                        TrapType.WATER,
+                        TrapType.NONE));
         return trapTypes;
     }
 
@@ -148,7 +150,8 @@ public class Duck {
         try {
             lookForFlag();
 
-            while (rc.hasFlag() && rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
+            while (rc.hasFlag()
+                    && rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
                 moveToward(allySpawnZoneDirection());
             }
             // Move and attack randomly if no objective.
@@ -296,6 +299,29 @@ public class Duck {
             didMove = moveInRandomDirection();
         }
         return didMove;
+    }
+
+    /**
+     * Look for nearby ducks to attack.
+     *
+     * @return True if Duck attacks, False otherwise
+     * @throws GameActionException
+     */
+    public boolean attack() throws GameActionException {
+        MapLocation enemyLocation;
+        boolean didAttack = false;
+        try {
+            enemyLocation = Arrays.stream(rc.senseNearbyRobots())
+                    .filter(robot -> rc.getTeam() != robot.getTeam())
+                    .filter(robot -> rc.canAttack(robot.location))
+                    .map(robot -> robot.location)
+                    .findFirst()
+                    .get();
+            rc.attack(enemyLocation);
+            didAttack = true;
+        } catch (Exception e) {
+        }
+        return didAttack;
     }
 
     // This returns an array of all possible directions in order of priority

@@ -30,30 +30,6 @@ public final class AttackerDuck extends Duck {
     }
 
     /**
-     * Look for nearby ducks to attack.
-     *
-     * @return True if AttackerDuck attacks, False otherwise
-     * @throws GameActionException
-     */
-    public boolean attack() throws GameActionException {
-        RobotController rc = getRobotController();
-        MapLocation enemyLocation;
-        boolean didAttack = false;
-        try {
-            enemyLocation = Arrays.stream(rc.senseNearbyRobots())
-                    .filter(robot -> rc.getTeam() != robot.getTeam())
-                    .filter(robot -> rc.canAttack(robot.location))
-                    .map(robot -> robot.location)
-                    .findFirst()
-                    .get();
-            rc.attack(enemyLocation);
-            didAttack = true;
-        } catch (Exception e) {
-        }
-        return didAttack;
-    }
-
-    /**
      * Select movement strategy and move.
      *
      * @return True if Duck moved, False if it didn't
