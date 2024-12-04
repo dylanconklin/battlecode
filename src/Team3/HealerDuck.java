@@ -107,7 +107,7 @@ public final class HealerDuck extends Duck {
         RobotInfo target = healTarget();
         // heal () is only done if no opponent in vision_radius.
         if (target != null
-                || rc.senseNearbyRobots(
+                && rc.senseNearbyRobots(
                 GameConstants.VISION_RADIUS_SQUARED,
                 rc.getTeam().opponent()
         ).length == 0) {
