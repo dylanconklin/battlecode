@@ -2,69 +2,189 @@ package Team3;
 
 import battlecode.common.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Random;
 
-import java.util.*;
-
+/**
+ * Duck parent class.
+ */
 public class Duck {
-    RobotController rc;
-    SkillType skill;
-    private static final Random rng = new Random();
-    private int cooldown = 0;
-    protected static final int FLAG_DROP_TIME = GameConstants.FLAG_DROPPED_RESET_ROUNDS;
-    protected static int flagTimer = 0;
+    /**
+     * The chosen health threshold.
+     */
+    public static final int HEALTH_THRESHOLD = 300;
+    /**
+     * Thirty seven. No idea why this number.
+     */
+    public static final int THIRTYSEVEN = 37;
+    /**
+     * Random number generator.
+     */
+    private static final Random RNG = new Random();
+    /**
+     * The robot controller.
+     */
+    private final RobotController rc;
+    /**
+     * Duck skill type.
+     */
+    private final SkillType skill;
 
-    public Duck(RobotController rc) {
-        this.rc = rc;
+    /**
+     * Duck constructer.
+     *
+     * @param controller
+     * @param duckSkill
+     */
+    public Duck(final RobotController controller, final SkillType duckSkill) {
+        this.rc = controller;
+        this.skill = duckSkill;
     }
 
-    public void updateEnemyRobots() throws GameActionException {
+    /**
+     * Get a randomized list of Directions.
+     *
+     * @return An ArrayList of Directions
+     */
+    public static ArrayList<Direction> randomDirections() {
+        ArrayList<Direction> directions = new ArrayList<Direction>(
+                Arrays.asList(Direction.allDirections()));
+        directions.remove(Direction.CENTER);
+        Collections.shuffle(directions);
+        directions.add(Direction.CENTER);
+        return directions;
+    }
+
+    static ArrayList<Direction> directions() {
+        ArrayList<Direction> directions = new ArrayList<>(
+                Arrays.asList(Direction.values()));
+        directions.remove(Direction.CENTER);
+        return directions;
+    }
+
+    static ArrayList<TrapType> trapTypes() {
+        ArrayList<TrapType> trapTypes = new ArrayList<>(
+                Arrays.asList(TrapType.EXPLOSIVE,
+                        TrapType.STUN,
+                        TrapType.WATER,
+                        TrapType.NONE));
+        return trapTypes;
+    }
+
+    /**
+     * Getter for RobotController.
+     *
+     * @return This Duck's RobotController
+     */
+    RobotController getRobotController() {
+        return rc;
+    }
+
+    /**
+     * Getter for skill.
+     *
+     * @return This Duck's Skill
+     */
+    SkillType getSkill() {
+        return skill;
+    }
+
+    /**
+     * Update the number of enemies on the board.
+     *
+     * @return the number of enemies on the board
+     * @throws GameActionException
+     */
+    public int updateEnemyRobots() throws GameActionException {
         // Sensing methods can be passed in a radius of -1 to automatically
         // use the largest possible value.
-        RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
+        RobotInfo[] enemyRobots = rc.senseNearbyRobots(
+                -1, rc.getTeam().opponent());
         if (enemyRobots.length != 0) {
-            // Save an array of locations with enemy robots in them for future use.
-            MapLocation[] enemyLocations = new MapLocation[enemyRobots.length];
-            for (int i = 0; i < enemyRobots.length; i++) {
-                enemyLocations[i] = enemyRobots[i].getLocation();
-            }
             // Let the rest of our team know how many enemy robots we see!
-            if (rc.canWriteSharedArray(0, enemyRobots.length)) {
-                rc.writeSharedArray(0, enemyRobots.length);
-                int numEnemies = rc.readSharedArray(0);
-            }
+            updateEnemiesList(enemyRobots);
         }
+        return enemyRobots.length;
     }
 
-    public void setupPlay() throws GameActionException {
+    /**
+     * Update the count of enemies.
+     *
+     * @param enemyRobots
+     * @return number of enemies
+     * @throws GameActionException
+     */
+    public int updateEnemiesList(final RobotInfo[] enemyRobots)
+            throws GameActionException {
+        // Let the rest of our team know how many enemy robots we see!
+        if (rc.canWriteSharedArray(0, enemyRobots.length)) {
+            rc.writeSharedArray(0, enemyRobots.length);
+            int numEnemies = rc.readSharedArray(0);
+        }
+        return enemyRobots.length;
+    }
+
+    /**
+     * Make sure Duck is spawned.
+     *
+     * @return True if Duck is spawned, False otherwise
+     * @throws GameActionException
+     */
+    public boolean setupPlay() throws GameActionException {
         if (!rc.isSpawned()) {
             RobotPlayer.spawn(rc);
         }
+        return rc.isSpawned();
     }
 
-    public void play() throws GameActionException {
-        lookForFlag();
+    /**
+     * Decider for what move to make.
+     *
+     * @return True if Duck finished a turn successfully, False otherwise
+     * @throws GameActionException
+     */
+    public boolean play() throws GameActionException {
+        boolean playedSuccessfully = false;
+        try {
+            lookForFlag();
 
-        while (rc.hasFlag() && rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
-            moveToward(allySpawnZoneDirection());
-        }
-        // Move and attack randomly if no objective.
-        Direction dir = RobotPlayer.directions[RobotPlayer.rng.nextInt(RobotPlayer.directions.length)];
-        MapLocation nextLoc = rc.getLocation().add(dir);
-        if (rc.canMove(dir)) {
-            rc.move(dir);
-        } else if (rc.canAttack(nextLoc)) {
-            rc.attack(nextLoc);
-        }
+            while (rc.hasFlag()
+                    && rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
+                moveToward(allySpawnZoneDirection());
+            }
+            // Move and attack randomly if no objective.
+            Direction dir = RobotPlayer.DIRECTIONS[
+                    RobotPlayer.RNG.nextInt(RobotPlayer.DIRECTIONS.length)];
+            MapLocation nextLoc = rc.getLocation().add(dir);
+            if (rc.canMove(dir)) {
+                rc.move(dir);
+            } else if (rc.canAttack(nextLoc)) {
+                rc.attack(nextLoc);
+            }
 
-        // Rarely attempt placing traps behind the robot.
-        MapLocation prevLoc = rc.getLocation().subtract(dir);
-        if (rc.canBuild(TrapType.EXPLOSIVE, prevLoc) && RobotPlayer.rng.nextInt() % 37 == 1)
-            rc.build(TrapType.EXPLOSIVE, prevLoc);
-        // We can also move our code into different methods or classes to better organize it!
-        updateEnemyRobots();
+            // Rarely attempt placing traps behind the robot.
+            MapLocation prevLoc = rc.getLocation().subtract(dir);
+            if (rc.canBuild(TrapType.EXPLOSIVE, prevLoc)
+                    && RobotPlayer.RNG.nextInt() % THIRTYSEVEN == 1) {
+                rc.build(TrapType.EXPLOSIVE, prevLoc);
+            }
+            // We can also move our code into different methods or classes
+            // to better organize it!
+            updateEnemyRobots();
+            playedSuccessfully = true;
+        } catch (GameActionException e) {
+        }
+        return playedSuccessfully;
     }
 
+    /**
+     * Look for nearby flags.
+     *
+     * @return True if Duck picked up flag, False otherwise
+     * @throws GameActionException
+     */
     public boolean lookForFlag() throws GameActionException {
         boolean pickedUpFlag = false;
         FlagInfo[] flags = rc.senseNearbyFlags(-1, rc.getTeam());
@@ -78,49 +198,82 @@ public class Duck {
         return pickedUpFlag;
     }
 
-    public boolean moveAwayFrom(MapLocation location) throws GameActionException {
+    /**
+     * Move away from Direction.
+     *
+     * @param location
+     * @return True if Duck moved, False otherwise
+     * @throws GameActionException
+     */
+    public boolean moveAwayFrom(final MapLocation location)
+            throws GameActionException {
         Direction direction = rc.getLocation().directionTo(location).opposite();
         return moveToward(direction);
     }
 
-    public static ArrayList<Direction> randomDirections() {
-        ArrayList<Direction> directions = new ArrayList<Direction>(Arrays.asList(Direction.allDirections()));
-        Collections.shuffle(directions);
-        return directions;
-    }
-
+    /**
+     * Move in a random direction.
+     *
+     * @return True if Duck moved, False otherwise
+     * @throws GameActionException
+     */
     public boolean moveInRandomDirection() throws GameActionException {
         boolean didMove = false;
         for (Direction dir : randomDirections()) {
             didMove = moveToward(dir);
-            if (didMove) break;
+            if (didMove) {
+                break;
+            }
         }
         return didMove;
     }
 
+    /**
+     * Get direction toward ally spawn zone.
+     *
+     * @return Direction toward ally spawn zone
+     */
     public Direction allySpawnZoneDirection() {
-        ArrayList<MapLocation> allySpawnLocations = new ArrayList<MapLocation>(Arrays.asList(rc.getAllySpawnLocations()));
+        ArrayList<MapLocation> allySpawnLocations = new ArrayList<MapLocation>(
+                Arrays.asList(rc.getAllySpawnLocations()));
         Collections.shuffle(allySpawnLocations);
         return rc.getLocation().directionTo(allySpawnLocations.get(0));
     }
 
+    /**
+     * Get direction toward enemy spawn zone.
+     *
+     * @return Direction toward enemy spawn zone
+     */
     public Direction enemySpawnZoneDirection() {
         return allySpawnZoneDirection().opposite();
     }
 
-    public boolean moveToward(MapLocation location) throws GameActionException {
-        if(location == null) return false;
+    /**
+     * Move toward ideal location.
+     *
+     * @param location
+     * @return True if Duck moved, False otherwise
+     * @throws GameActionException
+     */
+    public boolean moveToward(final MapLocation location)
+            throws GameActionException {
         Direction direction = rc.getLocation().directionTo(location);
         return moveToward(direction);
     }
 
-
-    public boolean moveToward(Direction direction) throws GameActionException {
+    /**
+     * Move toward ideal direction.
+     *
+     * @param direction
+     * @return True if Duck moved, False otherwise
+     * @throws GameActionException
+     */
+    public boolean moveToward(final Direction direction)
+            throws GameActionException {
         boolean didMove = false;
-        if (rc.canFill(rc.getLocation().add(direction))) {
-            rc.fill(rc.getLocation().add(direction));
-        }
-        for(Direction prioritizedDirection : getPrioritizedDirections(direction)) {
+        for (Direction prioritizedDirection
+                : getPrioritizedDirections(direction)) {
             if (rc.canMove(prioritizedDirection)) {
                 rc.move(prioritizedDirection);
                 didMove = true;
@@ -130,136 +283,67 @@ public class Duck {
         return didMove;
     }
 
-
-//    public boolean lookForFlag() throws GameActionException {
-//        boolean pickedUpFlag = false;
-//        FlagInfo[] flags = rc.senseNearbyFlags(-1, rc.getTeam());
-//        for (FlagInfo flag : flags) {
-//            if (rc.canPickupFlag(flag.getLocation())) {
-//                pickedUpFlag = true;
-//                rc.pickupFlag(flag.getLocation());
-//                break;
-//
-//                public TrapType getRandomTrapType () {
-//                    TrapType[] trapTypes = {TrapType.EXPLOSIVE, TrapType.WATER, TrapType.STUN};
-//                    return trapTypes[rng.nextInt(trapTypes.length)];
-//                }
-//            }
-//        }
-//    }
-
-    public boolean hasCooldown() {
-        return cooldown > 0;
-    }
-
-    public void applyCooldown(int amount) {
-        cooldown += amount;
-    }
-
-    public void reduceCooldown() {
-        if (cooldown > 0) {
-            cooldown--;
-        }
-    }
-
-    public void collectCrumbs() throws GameActionException {
-        MapLocation[] crumbLocations = rc.senseNearbyCrumbs(GameConstants.VISION_RADIUS_SQUARED);
+    /**
+     * Collect nearby crumbs.
+     *
+     * @return True if Duck moved, False otherwise
+     * @throws GameActionException
+     */
+    public boolean collectCrumbs() throws GameActionException {
+        MapLocation[] crumbLocations =
+                rc.senseNearbyCrumbs(GameConstants.VISION_RADIUS_SQUARED);
+        boolean didMove = false;
         if (crumbLocations.length > 0) {
-            moveToward(crumbLocations[0]);
+            didMove = moveToward(crumbLocations[0]);
         } else {
-            moveInRandomDirection();
+            didMove = moveInRandomDirection();
         }
+        return didMove;
     }
 
-    public void placeTrap(TrapType trapType, MapLocation location) throws GameActionException {
-        if (trapType == TrapType.EXPLOSIVE && rc.canBuild(TrapType.EXPLOSIVE, location) && !hasCooldown()) {
-            rc.build(TrapType.EXPLOSIVE, location);
-            applyCooldown(GameConstants.FILL_COOLDOWN);
-        } else if (trapType == TrapType.STUN && rc.canBuild(TrapType.STUN, location) && !hasCooldown()) {
-            rc.build(TrapType.STUN, location);
-            applyCooldown(GameConstants.FILL_COOLDOWN);
-        } else if (trapType == TrapType.WATER && rc.canFill(location) && !hasCooldown()) {
-            rc.fill(location);
-            applyCooldown(GameConstants.FILL_COOLDOWN);
-        } else if (trapType == TrapType.NONE && rc.canDig(location) && !hasCooldown()) {
-            rc.dig(location);
-            applyCooldown(GameConstants.DIG_COOLDOWN);
+    /**
+     * Look for nearby ducks to attack.
+     *
+     * @return True if Duck attacks, False otherwise
+     * @throws GameActionException
+     */
+    public boolean attack() throws GameActionException {
+        MapLocation enemyLocation;
+        boolean didAttack = false;
+        try {
+            enemyLocation = Arrays.stream(rc.senseNearbyRobots())
+                    .filter(robot -> rc.getTeam() != robot.getTeam())
+                    .filter(robot -> rc.canAttack(robot.location))
+                    .map(robot -> robot.location)
+                    .findFirst()
+                    .get();
+            rc.attack(enemyLocation);
+            didAttack = true;
+        } catch (Exception e) {
         }
+        return didAttack;
     }
 
-//    public void lookForFlag() throws GameActionException {
-//        FlagInfo[] flags = rc.senseNearbyFlags(-1, rc.getTeam());
-//        for (FlagInfo flag : flags) {
-//            if (rc.canPickupFlag(flag.getLocation())) {
-//                rc.pickupFlag(flag.getLocation());
-//                break;
-//            }
-//        }
-//    }
-
-
-//    public void lookForFlag() throws GameActionException {
-//        if (rc.hasFlag()) {
-//            // Reset flag timer if the Duck is holding a flag
-//            flagTimer = 0;
-//            // Check for nearby enemies
-//            RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(GameConstants.ATTACK_RADIUS_SQUARED, rc.getTeam().opponent());
-//
-//            // Drop the flag as a signal if enemies are close and dropping is allowed
-//            if (nearbyEnemies.length > 0 && rc.canDropFlag(rc.getLocation())) {
-//                rc.dropFlag(rc.getLocation());
-//                applyCooldown(GameConstants.PICKUP_DROP_COOLDOWN);
-//            }
-//        } else {
-//            // Increment flag timer when the Duck is not holding a flag
-//            flagTimer++;
-//            // Attempt to pick up a flag if the timer exceeds the threshold
-//            if (flagTimer >= FLAG_DROP_TIME) {
-//                // Sense flags for the team within unlimited range
-//                FlagInfo[] flags = rc.senseNearbyFlags(-1, rc.getTeam());
-//                FlagInfo closestFlag = null;
-//                int closestDistance = Integer.MAX_VALUE;
-//                // Find the nearest flag that can be picked up
-//                for (FlagInfo flag : flags) {
-//                    int distance = rc.getLocation().distanceSquaredTo(flag.getLocation());
-//                    if (distance < closestDistance && rc.canPickupFlag(flag.getLocation()) && !hasCooldown()) {
-//                        closestFlag = flag;
-//                        closestDistance = distance;
-//                    }
-//                }
-//
-//                // Pick up the nearest flag if available
-//                if (closestFlag != null) {
-//                    rc.pickupFlag(closestFlag.getLocation());
-//                    //broadcastFlagLocation(closestFlag.getLocation());
-//                    applyCooldown(GameConstants.PICKUP_DROP_COOLDOWN);
-//                }
-//                // Reset the flag timer after attempting to pick up a flag
-//                flagTimer = 0;
-//            }
-//        }
-//        return pickedUpFlag;
-//    }
-
-    static ArrayList<Direction> directions() {
-        ArrayList<Direction> directions = new ArrayList<>(Arrays.asList(Direction.values()));
-        directions.remove(Direction.CENTER);
-        return directions;
-    }
-
-    // This returns an array of all possible directions in order of priority based on the seed direction(primaryDirection)
-    private ArrayList<Direction> getPrioritizedDirections(Direction primaryDirection) throws GameActionException {
+    // This returns an array of all possible directions in order of priority
+    // based on the seed direction(primaryDirection)
+    private ArrayList<Direction> getPrioritizedDirections(
+            final Direction primaryDirection) throws GameActionException {
         ArrayList<Direction> result = new ArrayList<>();
         ArrayList<Direction> directions = directions();
         int direction = directions.indexOf(primaryDirection);
         int moveCounter = 0;
         result.add(primaryDirection);
         while (moveCounter * 2 < directions.size()) {
-            // Randomize whether we're going left or right, then add both directions
-            direction *= rng.nextBoolean() ? 1 : -1;
-            result.add(directions.get(direction < 0 ? direction + directions.size() : direction % directions.size()));
+            // Randomize whether we're going left or right,
+            // then add both directions
+            direction *= RNG.nextBoolean() ? 1 : -1;
+            result.add(directions.get(direction < 0
+                    ? direction + directions.size()
+                    : direction % directions.size()));
             direction *= -1;
-            result.add(directions.get(direction < 0 ? direction + directions.size() : direction % directions.size()));
+            result.add(directions.get(direction < 0
+                    ? direction + directions.size()
+                    : direction % directions.size()));
             moveCounter++;
         }
         result.add(primaryDirection.opposite());

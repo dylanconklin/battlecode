@@ -2,152 +2,122 @@ package Team3;
 
 import battlecode.common.*;
 
-public class BuilderDuck extends Duck {
-    public enum State { SETUP, DEFENDING, EXPLORING }
-    public State state = State.SETUP;
-    public int trapCooldown = 0;
-    public static final int SENSING_RADIUS = 10; // Adjust based on game settings
+import java.util.Arrays;
 
-    public BuilderDuck(RobotController rc) {
-        super(rc);
-        skill = SkillType.BUILD;
+/**
+ * BuilderDuck class to defend flags, place traps,
+ * adapt terrain, and maintain resources.
+ */
+public final class BuilderDuck extends Duck {
+    /**
+     * Threshold.
+     */
+    public static final int FOUR = 4;
+
+    /**
+     * Constructor for BuilderDuck.
+     *
+     * @param rc
+     */
+    public BuilderDuck(final RobotController rc) {
+        super(rc, SkillType.BUILD);
     }
 
     @Override
-    public void play() throws GameActionException {
-        super.setupPlay();
-        if (rc.canBuyGlobal(GlobalUpgrade.CAPTURING)) {
-            rc.buyGlobal(GlobalUpgrade.CAPTURING);
-        }
+    public boolean play() throws GameActionException {
+        boolean playedSuccessfully = false;
+        try {
+            super.setupPlay();
 
-        lookForFlag();
+            // Defend flags by staying close and placing traps
+            defendFlag();
 
-        // Perform actions based on game phase and resources
-        if (rc.getRoundNum() < GameConstants.SETUP_ROUNDS) {
-            setupDefensivePerimeter(); // Initial defensive setup
-            state = State.DEFENDING; // Transition to DEFENDING state
-        } else {
-            switch (state) {
-                case DEFENDING:
-                    guardFlag();
-                    adaptiveTrapPlacement(); // Trap placement based on nearby enemies
-                    break;
-                case EXPLORING:
-                    gatherResources(); // Resource gathering in exploring mode
-                    break;
-            }
-        }
+            // Place traps strategically around the flag or critical locations
+            placeTraps();
 
-        // Reduce cooldown at the end of the turn
-        if (trapCooldown > 0) {
-            trapCooldown--;
+            // Adapt terrain to address water obstacles
+            handleWaterObstacles();
+
+            // Collect crumbs to maintain a supply for building and defending
+            collectCrumbs();
+
+            // Move if no specific task is immediately required
+            moveInRandomDirection();
+
+            playedSuccessfully = true;
+        } catch (GameActionException e) {
         }
-        reduceCooldown();
+        return playedSuccessfully;
     }
 
-    public void setupDefensivePerimeter() throws GameActionException {
-        MapLocation allyFlagLocation = rc.getLocation().add(allySpawnZoneDirection());
+    /**
+     * Defend the flag by staying near it and positioning traps.
+     *
+     * @return True if BuilderDuck stayed near flag, False otherwise
+     * @throws GameActionException
+     */
+    public boolean defendFlag() throws GameActionException {
+        RobotController rc = getRobotController();
+        boolean movedTowardFlag = false;
+        try {
+            MapLocation flagLocation = Arrays
+                    .stream(rc.senseNearbyFlags(
+                            GameConstants.VISION_RADIUS_SQUARED, rc.getTeam()))
+                    .map(flag -> flag.getLocation())
+                    .findFirst().get();
 
-        for (Direction dir : Direction.allDirections()) {
-            MapLocation targetLocation = allyFlagLocation.add(dir);
-
-            // Create water barriers as a primary defense
-            if (rc.canFill(targetLocation) && !hasCooldown()) {
-                rc.fill(targetLocation);
-                applyCooldown(GameConstants.FILL_COOLDOWN);
+            if (rc.getLocation().distanceSquaredTo(flagLocation) > FOUR) {
+                movedTowardFlag = moveToward(flagLocation);
             }
-
-            // Place explosive traps around the flag for additional protection
-            if (rc.canBuild(TrapType.EXPLOSIVE, targetLocation) && rc.getCrumbs() >= GameConstants.FILL_COST && !hasCooldown()) {
-                placeTrap(TrapType.EXPLOSIVE, targetLocation);
-            }
+        } catch (Exception e) {
         }
+        return movedTowardFlag;
     }
 
-    public void guardFlag() throws GameActionException {
-        MapLocation flagLocation = rc.getLocation(); // Assuming the flag location is the robot's current location
+    /**
+     * Place traps to defend flags or key locations.
+     *
+     * @return True if BuilderDuck built a trap, False otherwise
+     * @throws GameActionException
+     */
+    public boolean placeTraps() throws GameActionException {
+        RobotController rc = getRobotController();
+        MapLocation currentLocation = rc.getLocation();
 
-        // Check for nearby enemies and adjust state based on threat level
-        RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(SENSING_RADIUS, rc.getTeam().opponent());
-        if (nearbyEnemies.length > 0) {
-            // System.out.println("Enemies detected near flag. Guarding flag.");
-            if (nearbyEnemies.length > 3) { // If enemies are overwhelming, switch to exploring
-                state = State.EXPLORING;
-            }
-        }
-    }
-
-    public void adaptiveTrapPlacement() throws GameActionException {
-        RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(GameConstants.VISION_RADIUS_SQUARED, rc.getTeam().opponent());
-
-        if (nearbyEnemies.length > 0) {
-            for (RobotInfo enemy : nearbyEnemies) {
-                MapLocation targetLocation = enemy.location;
-
-                // Clear water if present at the target location to make space for traps
-                if (!rc.sensePassability(targetLocation) && rc.canDig(targetLocation) && !hasCooldown()) {
-                    rc.dig(targetLocation);
-                    applyCooldown(GameConstants.DIG_COOLDOWN);
-                } else {
-                    // Place an explosive trap near enemies for effective damage
-                    placeTrap(TrapType.EXPLOSIVE, targetLocation);
-                }
-                break; // Limit trap placement to one per turn for resource efficiency
-            }
-        } else {
-            // No enemies nearby; focus on creating barriers or stun traps
-            for (Direction randomDir : randomDirections()) {
-                MapLocation targetLocation = rc.getLocation().add(randomDir);
-
-                if (rc.getCrumbs() >= GameConstants.FILL_COST && rc.canBuild(TrapType.WATER, targetLocation) && !hasCooldown()) {
-                    placeTrap(TrapType.WATER, targetLocation); // Create water obstacles
-                    break;
-                } else if (rc.getCrumbs() >= GameConstants.DIG_COST && rc.canBuild(TrapType.STUN, targetLocation) && !hasCooldown()) {
-                    placeTrap(TrapType.STUN, targetLocation); // Create stun traps to hinder enemies
-                    break;
+        for (TrapType trapType : trapTypes()) {
+            for (Direction direction : randomDirections()) {
+                MapLocation targetLocation = currentLocation.add(direction);
+                if (rc.canBuild(trapType, targetLocation)) {
+                    rc.build(TrapType.EXPLOSIVE, targetLocation);
+                    return true;
                 }
             }
         }
+        return false;
     }
 
-    public int gatherResources() throws GameActionException {
-        // System.out.println("Exploring and gathering resources...");
+    /**
+     * Handles water obstacles by filling tiles.
+     *
+     * @return True if BuilderDuck fills square, False otherwise
+     * @throws GameActionException
+     */
+    public boolean handleWaterObstacles() throws GameActionException {
+        RobotController rc = getRobotController();
+        boolean didFill = false;
 
-        // Check for resources within sensing radius
-        MapLocation resourceLocation = findNearestResource();
-        if (resourceLocation != null) {
-            moveToward(resourceLocation); // Move towards the resource location
-            return 0;
-        } else {
-            moveInRandomDirection(); // Explore randomly if no resources are detected
-            return 1;
+        try {
+            MapLocation targetLocation = randomDirections()
+                    .stream()
+                    .filter(dir -> rc.canFill(rc.getLocation().add(dir)))
+                    .map(dir -> rc.getLocation().add(dir))
+                    .findFirst().get();
+
+            rc.fill(targetLocation);
+            didFill = true;
+        } catch (Exception e) {
         }
-    }
 
-    // Helper method to find the nearest resource (simplified example)
-    public MapLocation findNearestResource() {
-        // Placeholder: Implement logic to detect nearby resources and return location
-        return null;
-    }
-
-    @Override
-    public void collectCrumbs() throws GameActionException {
-        MapLocation[] crumbLocations = rc.senseNearbyCrumbs(GameConstants.VISION_RADIUS_SQUARED);
-    if(crumbLocations != null) {
-        if (crumbLocations.length > 0) {
-            moveToward(crumbLocations[0]); // Move towards the nearest crumb location
-        } else {
-            moveInRandomDirection(); // Explore randomly if no crumbs are nearby
-        }
-    }
-    }
-
-    public void placeTrap(TrapType trapType, MapLocation targetLocation) throws GameActionException {
-        if (rc.canBuild(trapType, targetLocation) && !hasCooldown()) {
-            rc.build(trapType, targetLocation);
-            applyCooldown(GameConstants.FILL_COOLDOWN); // Assuming FILL_COOLDOWN for trap building
-            trapCooldown = 15; // Cooldown reset for trap placement
-            // System.out.println("Placed " + trapType + " trap at: " + targetLocation);
-        }
+        return didFill;
     }
 }
