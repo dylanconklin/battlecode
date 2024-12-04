@@ -80,27 +80,46 @@ public class HealerDuckTest {
         assertFalse(didHeal);
     }
 
+
     @Test
-    void testHealAlly2() throws GameActionException {
-        // Mock a nearby ally
+    void testHealAlly3() throws GameActionException {
+
         RobotInfo ally = mock(RobotInfo.class);
-        RobotInfo[] enemyRobots = {
-                new RobotInfo(1, Team.A, 70, new MapLocation(1, 12), false, 1, 1, 1),
-                new RobotInfo(2, Team.B, 100, new MapLocation(1, 123), false, 1, 1, 1)
-        };
         MapLocation allyLocation = new MapLocation(8, 8);
         when(ally.getLocation()).thenReturn(allyLocation);
         when(ally.getHealth()).thenReturn(100);
 
-        // Mock the RobotController to return a list of allies when sensing nearby robots
-        when(rc.senseNearbyRobots(GameConstants.VISION_RADIUS_SQUARED, rc.getTeam().opponent())).thenReturn(enemyRobots);
+        when(rc.senseNearbyRobots(GameConstants.VISION_RADIUS_SQUARED, rc.getTeam().opponent())).thenReturn(new RobotInfo[]{});
+
         when(rc.senseNearbyRobots(any(MapLocation.class), anyInt(), any(Team.class))).thenReturn(new RobotInfo[]{ally});
         when(rc.isActionReady()).thenReturn(true);
         when(rc.canHeal(allyLocation)).thenReturn(true);
         doNothing().when(rc).heal(allyLocation);
 
-        boolean didHeal = healerDuck.heal_ally();
 
+        boolean didHeal = healerDuck.heal_ally();
+        assertFalse(didHeal);
+
+        when(rc.senseNearbyRobots(GameConstants.VISION_RADIUS_SQUARED, rc.getTeam().opponent())).thenReturn(new RobotInfo[]{});
+        when(rc.isActionReady()).thenReturn(false); // Test when action is not ready
+        didHeal = healerDuck.heal_ally();
+        assertFalse(didHeal);
+
+
+        when(rc.senseNearbyRobots(any(MapLocation.class), anyInt(), any(Team.class))).thenReturn(new RobotInfo[]{});
+        didHeal = healerDuck.heal_ally();
+        assertFalse(didHeal);
+
+
+        when(rc.senseNearbyRobots(any(MapLocation.class), anyInt(), any(Team.class)))
+                .thenReturn(new RobotInfo[]{mock(RobotInfo.class)});
+        when(rc.canHeal(any(MapLocation.class))).thenReturn(false); // Cannot heal
+        didHeal = healerDuck.heal_ally();
+        assertFalse(didHeal);
+
+        when(rc.canMove(any(Direction.class))).thenReturn(false);
+        when(rc.adjacentLocation(any(Direction.class))).thenReturn(new MapLocation(0, 0));
+        didHeal = healerDuck.heal_ally();
         assertFalse(didHeal);
     }
 

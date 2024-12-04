@@ -82,7 +82,7 @@ public final class HealerDuck extends Duck {
      * @return The RobotInfo of the best target to heal, or null if no target is found.
      * @throws GameActionException if an error occurs during sensing.
      */
-    private RobotInfo healTarget(MapLocation c,int r) throws GameActionException {
+    public RobotInfo healTarget(MapLocation c,int r) throws GameActionException {
         RobotController rc = getRobotController();
         RobotInfo target = null;
         int minHealth = Integer.MAX_VALUE;
