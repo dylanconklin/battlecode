@@ -40,5 +40,42 @@ void testDefendFlagNoFlag() throws GameActionException {
             .thenReturn(flags);
 
     assertFalse(builderDuck.defendFlag());
-}
+    }
+    @Test
+    void testPlaceTraps() throws GameActionException {
+        // Mock trap placement
+        when(rc.getLocation()).thenReturn(new MapLocation(1, 1));
+        when(rc.canBuild(any(TrapType.class), any(MapLocation.class))).thenReturn(true);
+
+        // Assume the trap can be placed at a given direction
+        assertTrue(builderDuck.placeTraps());
+    }
+    @Test
+    void testPlaceTrapsNoPlacement() throws GameActionException {
+        // Test for when traps can't be placed
+        when(rc.getLocation()).thenReturn(new MapLocation(1, 1));
+        when(rc.canBuild(any(TrapType.class), any(MapLocation.class))).thenReturn(false);
+
+        assertFalse(builderDuck.placeTraps());
+    }
+
+    @Test
+    void testHandleWaterObstacles() throws GameActionException {
+        // Mock water obstacle handling
+        MapLocation waterLocation = new MapLocation(1, 1);
+        when(rc.getLocation()).thenReturn(new MapLocation(0, 0));
+        when(rc.canFill(waterLocation)).thenReturn(true);
+
+        // Test that it returns true when it fills water
+        assertTrue(builderDuck.handleWaterObstacles());
+    }
+    @Test
+    void testHandleWaterObstaclesNoFill() throws GameActionException {
+        // Test for when water can't be filled
+        when(rc.getLocation()).thenReturn(new MapLocation(0, 0));
+        when(rc.canFill(any(MapLocation.class))).thenReturn(false);
+
+        assertFalse(builderDuck.handleWaterObstacles());
+    }
+
 }
